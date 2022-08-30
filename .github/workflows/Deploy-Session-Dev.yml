@@ -25,7 +25,7 @@ jobs:
           npm install
       - name: Deploy
         run: |
-          zip -j deploy.zip ./*
+          zip -r deploy.zip ./
           aws lambda update-function-code \
             --function-name ${{ secrets.LAMBDAFUNCNAME }} \
             --zip-fil "fileb://./deploy.zip" \
