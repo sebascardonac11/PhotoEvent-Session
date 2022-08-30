@@ -5,6 +5,7 @@ const s3Client = new AWS.S3();
 const jwt_decode = require('jwt-decode');
 
 exports.handler = async function (event, context, callback) {
+  console.log("Event: ",event);
   var data;
   var authorizationDecoded = jwt_decode(event.headers.Authorization);
   //console.log("JWT: ", authorizationDecoded.username);
