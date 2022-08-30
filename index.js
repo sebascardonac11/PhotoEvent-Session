@@ -17,16 +17,15 @@ exports.handler = async function (event, context, callback) {
       }
       break;
     case 'PUT':
-      console.log("Ingresando a PUT");
       var put = await putPhoto(authorizationDecoded.email, event.body);
+      console.log("regrese putPhoto");
       if (put) this.data = "Objet Upload" 
       else this.data = 'Error';
       break;
     default:
     // code
   }
-  console.log("data: ", this.data)
-  return {
+   var response ={
     statusCode: 200,
     headers: {
       "Access-Control-Allow-Headers": "Content-Type",
@@ -36,6 +35,8 @@ exports.handler = async function (event, context, callback) {
     },
     body: JSON.stringify(this.data)
   };
+  console.log(response);
+  return response;
 };
 
 async function getSessionsPhotos(email) {
@@ -55,7 +56,6 @@ async function getSessions(email) {
   return data;
 }
 async function putPhoto(email, data) {
-  console.log("Ingrese a putPhoto con el email:",email);
   try {
     const params = {
       Bucket: 'photoevent/photoClient',
@@ -66,9 +66,8 @@ async function putPhoto(email, data) {
         "Photographer": email
       }
     };
-    console.log("Parametros putObject ", params)
     const newData = await s3Client.putObject(params).promise();
-
+    console.log("Parametros putObject ", params)
     if (!newData) {
       console.log("Something wrong in s2Client: ", newData)
       return false;
