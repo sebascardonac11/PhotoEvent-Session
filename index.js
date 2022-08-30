@@ -18,9 +18,7 @@ exports.handler = async function (event, context, callback) {
       }
       break;
     case 'PUT':
-      console.log("putPhoto");
       var put = await putPhoto(authorizationDecoded.email, event.body,event.queryStringParameters.fileName);
-      console.log("regrese putPhoto");
       if (put) this.data = "Objet Upload"
       else this.data = 'Error';
       break;
@@ -42,12 +40,9 @@ exports.handler = async function (event, context, callback) {
 };
 
 async function getSessionsPhotos(email) {
-  var params = {
-    TableName: "photoEvent-Dynamo-session"
-  }
-  var result = await dynamo.scan(params).promise();
-  var data = result.Items;
-  return data;
+  return [
+    {'photo':'Aqui van las fotos'}
+  ];
 }
 async function getSessions(email) {
   var params = {
@@ -63,7 +58,7 @@ async function putPhoto(email, data,fileName) {
       Bucket: 'photoevent/photoClient',
       Body: data,
       Key: fileName,
-      ContentType: 'image/jpg',
+      ContentType: 'image/jpeg',
       Metadata: {
         "Photographer": email
       }

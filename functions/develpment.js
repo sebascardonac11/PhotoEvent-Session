@@ -21,7 +21,8 @@ async function handler(event) {
             }
             break;
         case 'PUT':
-            this.data = await putPhoto(authorizationDecoded.email, event.body);
+            //this.data = await putPhoto(authorizationDecoded.email, event.body);
+            //console.log("Event contenttype",event.`content-type`)
             break;
         default:
         // code
