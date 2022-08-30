@@ -67,12 +67,14 @@ async function putPhoto(email, data) {
     const newData = await s3Client.putObject(params).promise();
 
     if (!newData) {
+      console.log("Something wrong in s2Client: ", newData)
       return false;
     }else{
       return true;
     }
   } catch (error) {
-    return error;
+    console.log("Something wrong in putPhoto: ", error)
+    return false;
   }
 }
 
