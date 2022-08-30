@@ -4,41 +4,42 @@ const s3Client = new AWS.S3();
 
 const jwt_decode = require('jwt-decode');
 
-exports.handler = async function(event, context, callback) {
+exports.handler = async function (event, context, callback) {
   var data;
   var authorizationDecoded = jwt_decode(event.headers.Authorization);
   //console.log("JWT: ", authorizationDecoded.username);
   switch (event.httpMethod) {
-      case 'GET':
-          if (event.resource=='/photoEvent-sessions') {
-              this.data = await getSessions(authorizationDecoded.email);
-          } else {
-              this.data = await getSessionsPhotos(authorizationDecoded.email);
-          }
-          break;
-      case 'PUT':
-              console.log("Ingresando a PUT");
-              this.data = await putPhoto(authorizationDecoded.email,event.body);
-          break;
-      default:
-      // code
+    case 'GET':
+      if (event.resource == '/photoEvent-sessions') {
+        this.data = await getSessions(authorizationDecoded.email);
+      } else {
+        this.data = await getSessionsPhotos(authorizationDecoded.email);
+      }
+      break;
+    case 'PUT':
+      console.log("Ingresando a PUT");
+      var put = await putPhoto(authorizationDecoded.email, event.body);
+      if (put) this.data = "Objet Upload"
+      break;
+    default:
+    // code
   }
-  console.log("data: ",this.data)
+  console.log("data: ", this.data)
   return {
-      statusCode: 200,
-      headers: {
-          "Access-Control-Allow-Headers": "Content-Type",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT",
-          "Content-Type": 'application/json'
-      },
-      body: JSON.stringify(this.data)
+    statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT",
+      "Content-Type": 'application/json'
+    },
+    body: JSON.stringify(this.data)
   };
 };
 
 async function getSessionsPhotos(email) {
   var params = {
-      TableName: "photoEvent-Dynamo-session"
+    TableName: "photoEvent-Dynamo-session"
   }
   var result = await dynamo.scan(params).promise();
   var data = result.Items;
@@ -46,29 +47,33 @@ async function getSessionsPhotos(email) {
 }
 async function getSessions(email) {
   var params = {
-      TableName: "photoEvent-Dynamo-session"
+    TableName: "photoEvent-Dynamo-session"
   }
   var result = await dynamo.scan(params).promise();
   var data = result.Items;
   return data;
 }
-async function putPhoto(email,data) {
-  const params = {
+async function putPhoto(email, data) {
+  try {
+    const params = {
       Bucket: 'photoevent/photoClient',
       Body: JSON.stringify(data),
       Key: 'test.jpg',
-      ContentType:'image/jpeg',
+      ContentType: 'image/jpeg',
       Metadata: {
-          "Photographer": email
-         }
-  };
-  const newData = await s3Client.putObject(params).promise();
+        "Photographer": email
+      }
+    };
+    const newData = await s3Client.putObject(params).promise();
 
-  if (!newData) {
-      console.log('there was an error writing the file');
+    if (!newData) {
+      return false;
+    }else{
+      return true;
+    }
+  } catch (error) {
+    return error;
   }
-  console.log("newData: ", newData);
-  return newData;
 }
 
 /* Data dummy para dynamo
