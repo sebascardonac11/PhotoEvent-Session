@@ -19,7 +19,7 @@ exports.handler = async function (event, context, callback) {
       break;
     case 'PUT':
       console.log("putPhoto");
-      var put = await putPhoto(authorizationDecoded.email, event.body);
+      var put = await putPhoto(authorizationDecoded.email, event.body,event.queryStringParameters.fileName);
       console.log("regrese putPhoto");
       if (put) this.data = "Objet Upload"
       else this.data = 'Error';
@@ -57,12 +57,12 @@ async function getSessions(email) {
   var data = result.Items;
   return data;
 }
-async function putPhoto(email, data) {
+async function putPhoto(email, data,fileName) {
   try {
     const params = {
       Bucket: 'photoevent/photoClient',
       Body: data,
-      Key: 'test.jpg',
+      Key: fileName,
       ContentType: 'image/jpeg',
       Metadata: {
         "Photographer": email
