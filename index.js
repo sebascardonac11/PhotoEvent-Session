@@ -3,7 +3,6 @@ const dynamo = new AWS.DynamoDB.DocumentClient();
 const s3Client = new AWS.S3();
 
 const jwt_decode = require('jwt-decode');
-const event = require('./requesExample');
 
 exports.handler = async function(event, context, callback) {
   var data;
