@@ -56,7 +56,7 @@ async function putPhoto(email, data,fileName) {
   try {
     const params = {
       Bucket: 'photoevent/photoClient',
-      Body: data,
+      Body: JSON.stringify(data),
       Key: fileName,
       ContentType: 'image/jpeg',
       Metadata: {
