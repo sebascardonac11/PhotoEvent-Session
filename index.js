@@ -55,6 +55,7 @@ async function getSessions(email) {
   return data;
 }
 async function putPhoto(email, data) {
+  console.log("Ingrese a putPhoto con el email:",email);
   try {
     const params = {
       Bucket: 'photoevent/photoClient',
