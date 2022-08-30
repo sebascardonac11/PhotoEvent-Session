@@ -67,13 +67,7 @@ async function putPhoto(email, data) {
         "Photographer": email
       }
     };
-    s3Client.putObject(params, function(err, data) {
-      if (err) {
-        console.log("Something wrong in s3Client: ", err)
-      } else {
-       console.log("UpObject",params)
-      }
-     });
+    const newData = await s3Client.putObject(params).promise();
       return true;
   } catch (error) {
     console.log("Something wrong in putPhoto: ", error)

@@ -14,19 +14,19 @@ async function handler(event) {
     //console.log("JWT: ", authorizationDecoded.username);
     switch (event.httpMethod) {
         case 'GET':
-            if (event.resource=='/photoEvent-sessions') {
+            if (event.resource == '/photoEvent-sessions') {
                 this.data = await getSessions(authorizationDecoded.email);
             } else {
                 this.data = await getSessionsPhotos(authorizationDecoded.email);
             }
             break;
         case 'PUT':
-                this.data = await putPhoto(authorizationDecoded.email,event.body);
+            this.data = await putPhoto(authorizationDecoded.email, event.body);
             break;
         default:
         // code
     }
-    console.log("data: ",this.data)
+    //console.log("data: ", this.data)
     return {
         statusCode: 200,
         headers: {
@@ -55,22 +55,29 @@ async function getSessions(email) {
     var data = result.Items;
     return data;
 }
-async function putPhoto(email,data) {
-    const params = {
-        Bucket: 'photoevent/photoClient',
-        Body: JSON.stringify(data),
-        Key: 'test.jpg',
-        ContentType:'image/jpeg',
-        Metadata: {
-            "Photographer": email
-           }
-    };
+async function putPhoto(email, data) {
+    try {
 
-    const newData = await s3Client.putObject(params).promise();
 
-    if (!newData) {
-        throw Error('there was an error writing the file');
+        const params = {
+            Bucket: 'photoevent4/photoClient',
+            Body: JSON.stringify(data),
+            Key: 'test.jpg',
+            ContentType: 'image/jpeg',
+            Metadata: {
+                "Photographer": email
+            }
+        };
+
+        const newData = await s3Client.putObject(params).promise();
+
+        if (!newData) {
+            throw Error('there was an error writing the file');
+        }
+        console.log("newData: ", newData);
+        return newData;
+    } catch (error) {
+        console.log("Error: ");
+        return error;
     }
-    console.log("newData: ", newData);
-    return newData;
 }
