@@ -63,7 +63,7 @@ async function putPhoto(email, data,fileName) {
       Bucket: 'photoevent/photoClient',
       Body: data,
       Key: fileName,
-      ContentType: 'image/jpeg',
+      ContentType: 'image/jpg',
       Metadata: {
         "Photographer": email
       }
