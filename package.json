@@ -1,0 +1,23 @@
+{
+  "name": "Session",
+  "version": "1.0.0",
+  "description": "Componente encargado de la gestion de las sesiones.",
+  "main": "functions/handler.js",
+  "scripts": {
+    "devStart": "nodemon functions/development.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sebastian Cardona Correa",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sebascardonac11/photoEvent.git"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.894.0",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.16"
+  }
+}

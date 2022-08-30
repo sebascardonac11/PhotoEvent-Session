@@ -1,0 +1,336 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  LambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Code:
+        ZipFile: |
+          console.log('Loading DynamoDB Lambda function');
+      FunctionName:
+        Ref: LambdaFuncName
+      Handler: index.handler
+      Runtime: nodejs16.x
+      Role: !GetAtt IAMRole.Arn
+    DependsOn:
+      - DynamoDBTable
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 9dec56b7-939f-4bc7-9200-47da6127bfe1
+  DynamoDBTable:
+    Type: 'AWS::DynamoDB::Table'
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName:
+        Ref: DynamoDBTableName
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: '5'
+        WriteCapacityUnits: '5'
+    DependsOn:
+      - IAMRole
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 25e3f28b-2aaa-4af9-a1bc-37afdf426f52
+  APIGatewayRestAPI:
+    Type: 'AWS::ApiGateway::RestApi'
+    Properties:
+      Name:
+        Ref: APIName
+      Description:
+        Ref: APIDesc
+    DependsOn:
+      - LambdaFunction
+  APIGatewayResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref APIGatewayRestAPI
+      ParentId: !GetAtt 
+        - APIGatewayRestAPI
+        - RootResourceId
+      PathPart:
+        Ref: ApiPathName
+    DependsOn:
+      - APIGatewayRestAPI
+  APIGatewayAuthorizer:
+    Type: 'AWS::ApiGateway::Authorizer'
+    Properties:
+      IdentitySource: method.request.header.Authorization
+      Name: CognitoAuthorizer
+      Type: COGNITO_USER_POOLS
+      ProviderARNs:
+        - !Ref CognitoARN
+      RestApiId: !Ref APIGatewayRestAPI
+    DependsOn:
+      - APIGatewayResource
+  APIGatewayMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      RestApiId: !Ref APIGatewayRestAPI
+      ResourceId: !Ref APIGatewayResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref APIGatewayAuthorizer
+      MethodResponses:
+        - StatusCode: 200
+      Integration:
+        Type: AWS_PROXY
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+        IntegrationHttpMethod: POST
+        Uri: !Sub 
+          - >-
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFuncNameArn}/invocations
+          - LambdaFuncNameArn: !GetAtt LambdaFunction.Arn
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true    
+    DependsOn:
+      - APIGatewayResource
+  ApiGwGet:
+    Type: 'AWS::ApiGateway::Method'
+    DependsOn:
+      - APIGatewayResource
+    Properties:
+      ResourceId: !Ref APIGatewayResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref APIGatewayAuthorizer
+      RestApiId: !Ref APIGatewayRestAPI
+      Integration:
+        Type: AWS_PROXY
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: $input.json('$')          
+            ResponseParameters:
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+        IntegrationHttpMethod: POST
+        Uri: !Sub 
+          - >-
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFuncNameArn}/invocations
+          - LambdaFuncNameArn: !GetAtt LambdaFunction.Arn
+        RequestTemplates:
+          application/json: $input.json('$')
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+  OptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref APIGatewayResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE      
+      RestApiId: !Ref APIGatewayRestAPI
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+    DependsOn:
+        - APIGatewayResource 
+  APIGwResorceSession:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref APIGatewayRestAPI
+      ParentId:  !Ref APIGatewayResource
+      PathPart: 'session'
+    DependsOn:
+      - APIGatewayResource  
+  APIGwResorceSessionId:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref APIGatewayRestAPI
+      ParentId:  !Ref APIGwResorceSession
+      PathPart: '{id+}'
+    DependsOn:
+      - APIGwResorceSession  
+  ApiGwSesssionIdOpt:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref APIGwResorceSessionId
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE      
+      RestApiId: !Ref APIGatewayRestAPI
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+    DependsOn:
+        - APIGwResorceSessionId 
+  ApiGwAny:
+    Type: 'AWS::ApiGateway::Method'
+    DependsOn:
+      - APIGwResorceSessionId
+    Properties:
+      ResourceId: !Ref APIGwResorceSessionId
+      HttpMethod: ANY
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref APIGatewayAuthorizer
+      RequestParameters:
+        method.request.path.proxy: true
+      RestApiId: !Ref APIGatewayRestAPI
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 
+          - >-
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFuncNameArn}/invocations
+          - LambdaFuncNameArn: !GetAtt LambdaFunction.Arn  
+        RequestTemplates:
+          application/json: $input.json('$')
+        IntegrationResponses:
+          - StatusCode: 200
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: $input.json('$')          
+            ResponseParameters:
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+  APIGatewayDeployment:
+    Type: 'AWS::ApiGateway::Deployment'
+    Properties:
+      RestApiId: !Ref APIGatewayRestAPI
+      StageName:
+        Ref: EnvironmentName
+    DependsOn:
+      - APIGatewayMethod
+      - ApiGwAny
+  APIGatewayPermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt LambdaFunction.Arn
+      Principal: apigateway.amazonaws.com
+    DependsOn:
+      - APIGatewayDeployment
+  IAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: Policy_api-lambda-db
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:BatchGetItem'
+                  - 'dynamodb:BatchWriteItem'
+                  - 'dynamodb:TagResource'
+                  - 'dynamodb:UntagResource'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:DeleteItem'
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:Scan'
+                  - 'dynamodb:Query'
+                  - 'dynamodb:UpdateItem'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogStream'
+                  - 'logs:CreateLogGroup'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'ec2:DescribeNetworkInterfaces'
+                  - 'ec2:CreateNetworkInterface'
+                  - 'ec2:DeleteNetworkInterface'
+                  - 'ec2:DescribeInstances'
+                  - 'ec2:AttachNetworkInterface'
+                Resource: '*'
+Parameters:
+  LambdaFuncName:
+    Type: String
+    Default: photoEvent-lambda-session
+  DynamoDBTableName:
+    Type: String
+    Default: photoEvent-Dynamo-session
+  APIName:
+    Type: String
+    Default: API-photoEvent-session
+  ApiPathName:
+    Type: String
+    Default: photoEvent-sessions
+  APIDesc:
+    Type: String
+    Default: Api dise?ada para los servicios de sesiones.
+  CognitoARN:
+    Type: String
+    Default: 'arn:aws:cognito-idp:us-west-2:547749462802:userpool/us-west-2_VCd4MZ9X8'
+  EnvironmentName:
+    Type: String
+    Default: Prod
