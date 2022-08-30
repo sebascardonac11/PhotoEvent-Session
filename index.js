@@ -17,15 +17,16 @@ exports.handler = async function (event, context, callback) {
       }
       break;
     case 'PUT':
+      console.log("putPhoto");
       var put = await putPhoto(authorizationDecoded.email, event.body);
       console.log("regrese putPhoto");
-      if (put) this.data = "Objet Upload" 
+      if (put) this.data = "Objet Upload"
       else this.data = 'Error';
       break;
     default:
     // code
   }
-   var response ={
+  var response = {
     statusCode: 200,
     headers: {
       "Access-Control-Allow-Headers": "Content-Type",
@@ -66,14 +67,14 @@ async function putPhoto(email, data) {
         "Photographer": email
       }
     };
-    const newData = await s3Client.putObject(params).promise();
-    console.log("Parametros putObject ", params)
-    if (!newData) {
-      console.log("Something wrong in s2Client: ", newData)
-      return false;
-    }else{
+    s3Client.putObject(params, function(err, data) {
+      if (err) {
+        console.log("Something wrong in s3Client: ", err)
+      } else {
+       console.log("UpObject",params)
+      }
+     });
       return true;
-    }
   } catch (error) {
     console.log("Something wrong in putPhoto: ", error)
     return false;
