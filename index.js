@@ -19,7 +19,8 @@ exports.handler = async function (event, context, callback) {
     case 'PUT':
       console.log("Ingresando a PUT");
       var put = await putPhoto(authorizationDecoded.email, event.body);
-      if (put) this.data = "Objet Upload"
+      if (put) this.data = "Objet Upload" 
+      else this.data = 'Error';
       break;
     default:
     // code
@@ -64,6 +65,7 @@ async function putPhoto(email, data) {
         "Photographer": email
       }
     };
+    console.log("Parametros putObject ", params)
     const newData = await s3Client.putObject(params).promise();
 
     if (!newData) {
