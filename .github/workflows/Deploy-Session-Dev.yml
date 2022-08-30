@@ -22,7 +22,6 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: Deploy
         run: |
-          cd BackEnd/session/
           zip -j deploy.zip ./functions/*
           aws lambda update-function-code \
             --function-name ${{ secrets.LAMBDAFUNCNAME }} \
