@@ -34,7 +34,7 @@ jobs:
       - name: STACK ID
         run: |
           echo "::set-output name=stackID::$(head -1 stackID.md)"
-          echo "steps.CloudFormation.outputs"
+          echo ${{steps.CloudFormation.outputs}}
       - name: Complete STACK
         run: |
           echo '::warning:: This is a warning message, to demonstrate that commands are being processed.'
