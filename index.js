@@ -1,4 +1,4 @@
-const Session = require('./session');
+const Session = require('./functions/session');
 const jwt_decode = require('jwt-decode');
 
 exports.handler = async function (event, context, callback) {
