@@ -73,14 +73,23 @@ async function setSessions(body, photographer) {
   }
 }
 async function getSessions(email) {
-  var params = {
-    TableName: "photoEvent-Dynamo-session"
-  }
-  var result = await dynamo.scan(params).promise();
-  var data = result.Items;
-  return {
-    statusCode: 200,
-    data: data
+  try {
+    var params = {
+      TableName: "photoEvent-Dynamo-session",
+      FilterExpression: "contains(photographer, :photographer)",
+      ExpressionAttributeValues: { ":photographer": email }
+    }
+    var result = await dynamo.scan(params).promise();
+    var data = result.Items;
+    return {
+      statusCode: 200,
+      data: data
+    }
+  } catch (error) {
+    return {
+      statusCode: 404,
+      data: error
+    }
   }
 }
 async function putPhoto(email, data, fileName) {

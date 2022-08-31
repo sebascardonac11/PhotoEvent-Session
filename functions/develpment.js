@@ -1,11 +1,13 @@
 const AWS = require('aws-sdk');
+AWS.config.update({region: 'us-east-2'});
 const dynamo = new AWS.DynamoDB.DocumentClient();
 const s3Client = new AWS.S3();
 
+
 const jwt_decode = require('jwt-decode');
 //const event = require('./requesExample');
-//const event = require('./requestExampleGetPhotos');
-const event = require('./requestExamplePOST');
+const event = require('./requestExampleGetPhotos');
+//const event = require('./requestExamplePOST');
 
 handler(event);
 
@@ -79,11 +81,15 @@ async function getSessionsPhotos(email) {
       ];
 }
 async function getSessions(email) {
+    
     var params = {
-        TableName: "photoEvent-Dynamo-session"
+        TableName: "photoEvent-Dynamo-session",
+        FilterExpression:"contains(photographer, :photographer)",
+        ExpressionAttributeValues: {":photographer": email} 
     }
     var result = await dynamo.scan(params).promise();
     var data = result.Items;
+    console.log(data);
     return data;
 }
 async function putPhoto(email, data) {

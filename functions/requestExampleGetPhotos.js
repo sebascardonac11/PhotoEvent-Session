@@ -1,6 +1,6 @@
 
 module.exports = {
-  resource: '/photoEvent-sessions/session/{id+}',
+  resource: '/photoEvent-sessions',
   path: '/photoEvent-sessions/session/1',
   httpMethod: 'GET',
   headers: {
