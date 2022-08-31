@@ -23,14 +23,14 @@ jobs:
       - name: CloudFormation
         run: |
             aws cloudformation create-stack --stack-name PhotoEvents-Session --capabilities CAPABILITY_NAMED_IAM --template-body file://./infraSession.yml \
-            --parameters \
-            ParameterKey=LambdaFuncName,      ParameterValue = 'photoEvent-lambda-session' \
-            ParameterKey=DynamoDBTableName,   ParameterValue = 'photoEvent-Dynamo-session' \
-            ParameterKey=APIName,             ParameterValue = 'photoEvent-session' \
-            ParameterKey=ApiPathName,         ParameterValue = 'API-photoEvent-session' \
-            ParameterKey=APIDesc,             ParameterValue = 'Api disenada para los servicios de sesiones.'\
-            ParameterKey=CognitoARN,          ParameterValue = 'arn:aws:cognito-idp:us-west-2:547749462802:userpool/us-west-2_VCd4MZ9X8' \
-            ParameterKey=EnvironmentName,     ParameterValue = 'QA' 
+            --parameters\
+            ParameterKey=LambdaFuncName,ParameterValue = 'photoEvent-lambda-session'\
+            ParameterKey=DynamoDBTableName,ParameterValue = 'photoEvent-Dynamo-session'\
+            ParameterKey=APIName,ParameterValue = 'photoEvent-session'\
+            ParameterKey=ApiPathName,ParameterValue = 'API-photoEvent-session'\
+            ParameterKey=APIDesc,ParameterValue = 'Api disenada para los servicios de sesiones.'\
+            ParameterKey=CognitoARN,ParameterValue = 'arn:aws:cognito-idp:us-west-2:547749462802:userpool/us-west-2_VCd4MZ9X8'\
+            ParameterKey=EnvironmentName,ParameterValue = 'QA' 
       - name: Build
         run: |
           npm install
