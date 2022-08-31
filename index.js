@@ -5,7 +5,7 @@ const s3Client = new AWS.S3();
 const jwt_decode = require('jwt-decode');
 
 exports.handler = async function (event, context, callback) {
-  console.log("Event: ",event);
+  console.log("Event: ", event);
   var data;
   var authorizationDecoded = jwt_decode(event.headers.Authorization);
   //console.log("JWT: ", authorizationDecoded.username);
@@ -18,14 +18,14 @@ exports.handler = async function (event, context, callback) {
       }
       break;
     case 'PUT':
-      var put = await putPhoto(authorizationDecoded.email, event.body,event.queryStringParameters.fileName);
+      var put = await putPhoto(authorizationDecoded.email, event.body, event.queryStringParameters.fileName);
       if (put) this.data = "Objet Upload"
       else this.data = 'Error';
       break;
     case 'POST':
       console.log("### POST ####")
-      this.data = await setSessions(event.body);
-      break;  
+      this.data = await setSessions(event.body,authorizationDecoded.email);
+      break;
     default:
     // code
   }
@@ -45,23 +45,29 @@ exports.handler = async function (event, context, callback) {
 
 async function getSessionsPhotos(email) {
   var params = {
-    Bucket: "examplebucket", 
-    MaxKeys: 2
-   };
-   const objects=await s3Client.listObjectsV2(params).promise();
-   console.log('objects ',objects)
+    Bucket: "photoevent/photoClient",
+    MaxKeys: 5
+  };
+  const objects = await s3Client.listObjectsV2(params).promise();
+  console.log('objects ', objects)
   return [
-    {'photo':'Aqui van las fotos'}
+    { 'photo': 'Aqui van las fotos' }
   ];
 }
-async function setSessions(body) {
-  var params = {
-    TableName: "photoEvent-Dynamo-session",
-    Item: body
+async function setSessions(body,photographer) {
+  try {
+    body.photographer=photographer
+    var params = {
+      TableName: "photoEvent-Dynamo-session",
+      Item: body
+    }
+    var result = await dynamo.put(params).promise();
+    console.log("Result: ", result)
+    return result;
+  } catch (error) {
+    console.log("Someting Wrong creating sessions", error)
+    return error;
   }
-  var result = await dynamo.put(params).promise();
-  console.log("Result: ",result)
-  return result;
 }
 async function getSessions(email) {
   var params = {
@@ -71,7 +77,7 @@ async function getSessions(email) {
   var data = result.Items;
   return data;
 }
-async function putPhoto(email, data,fileName) {
+async function putPhoto(email, data, fileName) {
   try {
     const params = {
       Bucket: 'photoevent/photoClient',
@@ -83,7 +89,7 @@ async function putPhoto(email, data,fileName) {
       }
     };
     const newData = await s3Client.putObject(params).promise();
-      return true;
+    return true;
   } catch (error) {
     console.log("Something wrong in putPhoto: ", error)
     return false;
