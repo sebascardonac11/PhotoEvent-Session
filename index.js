@@ -8,17 +8,17 @@ exports.handler = async function (event, context, callback) {
   switch (event.httpMethod) {
     case 'GET':
       if (event.resource == '/photoEvent-sessions') {
-        this.response = session.getSessions(authorizationDecoded.email);
+        this.response = await session.getSessions(authorizationDecoded.email);
       } else {
-        this.response = session.getSessionsPhotos(authorizationDecoded.email);
+        this.response = await session.getSessionsPhotos(authorizationDecoded.email);
       }
       break;
     case 'PUT':
-      this.response = session.putPhoto(authorizationDecoded.email, event.body, event.queryStringParameters.fileName);
+      this.response = await session.putPhoto(authorizationDecoded.email, event.body, event.queryStringParameters.fileName);
       break;
     case 'POST':
       console.log("### POST ####")
-      this.response = session.setSessions(event.body, authorizationDecoded.email);
+      this.response = await session.setSessions(event.body, authorizationDecoded.email);
       break;
     default:
     // code
