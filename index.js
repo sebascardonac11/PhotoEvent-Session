@@ -6,41 +6,35 @@ const jwt_decode = require('jwt-decode');
 
 exports.handler = async function (event, context, callback) {
   console.log("Event: ", event);
-  var data;
   var authorizationDecoded = jwt_decode(event.headers.Authorization);
-  //console.log("JWT: ", authorizationDecoded.username);
   switch (event.httpMethod) {
     case 'GET':
       if (event.resource == '/photoEvent-sessions') {
-        this.data = await getSessions(authorizationDecoded.email);
+        this.response = await getSessions(authorizationDecoded.email);
       } else {
-        this.data = await getSessionsPhotos(authorizationDecoded.email);
+        this.response = await getSessionsPhotos(authorizationDecoded.email);
       }
       break;
     case 'PUT':
-      var put = await putPhoto(authorizationDecoded.email, event.body, event.queryStringParameters.fileName);
-      if (put) this.data = "Objet Upload"
-      else this.data = 'Error';
+      this.response = await putPhoto(authorizationDecoded.email, event.body, event.queryStringParameters.fileName);
       break;
     case 'POST':
       console.log("### POST ####")
-      this.data = await setSessions(event.body,authorizationDecoded.email);
+      this.response = await setSessions(event.body, authorizationDecoded.email);
       break;
     default:
     // code
   }
-  var response = {
-    statusCode: 200,
+  return {
+    statusCode: this.response.statusCode,
     headers: {
       "Access-Control-Allow-Headers": "Content-Type",
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT",
       "Content-Type": 'application/json'
     },
-    body: JSON.stringify(this.data)
+    body: JSON.stringify(this.response.data)
   };
-  console.log(response);
-  return response;
 };
 
 async function getSessionsPhotos(email) {
@@ -50,25 +44,32 @@ async function getSessionsPhotos(email) {
   };
   const objects = await s3Client.listObjectsV2(params).promise();
   console.log('objects ', objects)
-  return [
-    { 'photo': 'Aqui van las fotos' }
-  ];
+  return {
+    statusCode: 200,
+    data: [{ 'photo': 'Aqui van las fotos' }]
+  }
 }
-async function setSessions(body,photographer) {
+async function setSessions(body, photographer) {
   try {
-    var  Item =JSON.parse(body);
-      Item.photographer=photographer
+    var Item = JSON.parse(body);
+    Item.photographer = photographer
     var params = {
       TableName: "photoEvent-Dynamo-session",
       Item: Item
     }
     console.log("param: ", params)
     var result = await dynamo.put(params).promise();
-    
-    return result;
+
+    return {
+      statusCode: 201,
+      data: result
+    }
   } catch (error) {
     console.log("Someting Wrong creating sessions", error)
-    return error;
+    return {
+      statusCode: 409,
+      data: result
+    };
   }
 }
 async function getSessions(email) {
@@ -77,7 +78,10 @@ async function getSessions(email) {
   }
   var result = await dynamo.scan(params).promise();
   var data = result.Items;
-  return data;
+  return {
+    statusCode: 200,
+    data: data
+  }
 }
 async function putPhoto(email, data, fileName) {
   try {
@@ -91,34 +95,15 @@ async function putPhoto(email, data, fileName) {
       }
     };
     const newData = await s3Client.putObject(params).promise();
-    return true;
+    return {
+      statusCode: 201,
+      data: data
+    }
   } catch (error) {
     console.log("Something wrong in putPhoto: ", error)
-    return false;
+    return {
+      statusCode: 404,
+      data: data
+    }
   }
 }
-
-/* Data dummy para dynamo
-{
-  "id": {
-    "S": "1"
-  },
-  "date": {
-    "S": "2022-02-17"
-  },
-  "description": {
-    "S": "Todas las categorias de FP1"
-  },
-  "event": {
-    "S": "1"
-  },
-  "name": {
-    "S": "FP1"
-  },
-  "photographer": {
-    "S": "f64c933c-916f-4be8-98c3-f5c0db7071ac"
-  }
-}
-
-
-*/
