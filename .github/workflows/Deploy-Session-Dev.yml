@@ -32,8 +32,9 @@ jobs:
             ParameterKey=CognitoARN,ParameterValue='arn:aws:cognito-idp:us-west-2:547749462802:userpool/us-west-2_VCd4MZ9X8' \
             ParameterKey=EnvironmentName,ParameterValue='QA' > stackID.md
       - name: STACK ID
-        run: echo "::set-output name=stackID::$(head -1 stackID.md)"
-        run: echo "steps.CloudFormation.outputs"
+        run: |
+          echo "::set-output name=stackID::$(head -1 stackID.md)"
+          echo "steps.CloudFormation.outputs"
       - name: Complete STACK
         run: |
           echo '::warning:: This is a warning message, to demonstrate that commands are being processed.'
