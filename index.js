@@ -23,6 +23,7 @@ exports.handler = async function (event, context, callback) {
     default:
     // code
   }
+  console.log("Response: ",this.response);
   return {
     statusCode: this.response.statusCode,
     headers: {
