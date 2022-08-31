@@ -22,6 +22,10 @@ exports.handler = async function (event, context, callback) {
       if (put) this.data = "Objet Upload"
       else this.data = 'Error';
       break;
+    case 'POST':
+      console.log("### POST ####")
+      this.data = await setSessions(event.body);
+      break;  
     default:
     // code
   }
@@ -40,9 +44,24 @@ exports.handler = async function (event, context, callback) {
 };
 
 async function getSessionsPhotos(email) {
+  var params = {
+    Bucket: "examplebucket", 
+    MaxKeys: 2
+   };
+   const objects=await s3Client.listObjectsV2(params).promise();
+   console.log('objects ',objects)
   return [
     {'photo':'Aqui van las fotos'}
   ];
+}
+async function setSessions(body) {
+  var params = {
+    TableName: "photoEvent-Dynamo-session",
+    Item: body
+  }
+  var result = await dynamo.put(params).promise();
+  console.log("Result: ",result)
+  return result;
 }
 async function getSessions(email) {
   var params = {

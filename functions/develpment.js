@@ -3,7 +3,8 @@ const dynamo = new AWS.DynamoDB.DocumentClient();
 const s3Client = new AWS.S3();
 
 const jwt_decode = require('jwt-decode');
-const event = require('./requesExample');
+//const event = require('./requesExample');
+const event = require('./requestExampleGetPhotos');
 
 
 handler(event);
@@ -42,11 +43,19 @@ async function handler(event) {
 
 async function getSessionsPhotos(email) {
     var params = {
-        TableName: "photoEvent-Dynamo-session"
-    }
-    var result = await dynamo.scan(params).promise();
-    var data = result.Items;
-    return data;
+        Bucket: "photoevent", 
+        MaxKeys: 10,
+        Prefix: "photoClient"
+       };
+       const objects=await s3Client.listObjectsV2(params).promise();
+       objects.Contents.forEach(async (element)  =>{
+            var object =await s3Client.headObject({Bucket: "photoevent", Key: element.Key}).promise();
+        console.log('objects ',object)
+       });
+       //console.log('objects ',objects)
+      return [
+        {'photo':'Aqui van las fotos'}
+      ];
 }
 async function getSessions(email) {
     var params = {
@@ -61,7 +70,7 @@ async function putPhoto(email, data) {
 
 
         const params = {
-            Bucket: 'photoevent4/photoClient',
+            Bucket: 'photoevent/photoClient',
             Body: JSON.stringify(data),
             Key: 'test.jpg',
             ContentType: 'image/jpeg',
