@@ -61,8 +61,9 @@ async function setSessions(body,photographer) {
       TableName: "photoEvent-Dynamo-session",
       Item: body
     }
+    console.log("param: ", params)
     var result = await dynamo.put(params).promise();
-    console.log("Result: ", result)
+    
     return result;
   } catch (error) {
     console.log("Someting Wrong creating sessions", error)
