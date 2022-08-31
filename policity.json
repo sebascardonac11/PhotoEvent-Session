@@ -1,0 +1,69 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket",
+                "s3:PutObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::photoevent/*"
+            ]
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action":[
+                "lambda:GetFunction",
+                "lambda:CreateFunction",
+                "lambda:UpdateFunctionCode",
+                "lambda:DeleteFunction"
+            ],
+            "Resource":[
+                "arn:aws:lambda:*:547749462802:function:*"
+            ]
+        },
+        {
+            "Sid": "VisualEditor2",
+            "Effect": "Allow",
+            "Action": [
+                "apigateway:POST",
+                "apigateway:DELETE",
+                "apigateway:GET",
+                "apigateway:PUT"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor3",
+            "Effect": "Allow",
+            "Action": [
+                "iam:GetRole",
+                "iam:CreateRole",
+                "iam:DeleteRole",
+                "iam:PutRolePolicy",
+                "iam:PassRole",
+                "iam:DeleteRolePolicy",
+
+                "cloudfront:CreateInvalidation",
+
+                "dynamodb:DeleteTable",
+                "dynamodb:CreateTable",
+                "dynamodb:DescribeTable",
+
+                "cloudformation:CreateStack",
+                "cloudformation:DeleteStack",
+                "cloudformation:UpdateStack"
+
+            ],
+            "Resource": [
+                "arn:aws:cloudfront::547749462802:distribution/*",
+                "arn:aws:iam::547749462802:role/*",
+                "arn:aws:dynamodb:*:547749462802:table/*",
+                "arn:aws:cloudformation:*:547749462802:stack/*/*"
+            ]
+        }
+    ]
+}
