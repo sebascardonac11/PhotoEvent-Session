@@ -39,11 +39,12 @@ exports.handler = async function (event, context, callback) {
 
 async function getSessionsPhotos(email) {
   var params = {
-    Bucket: "photoevent/photoClient",
+    Bucket: "photoevent",
+    Prefix: "photoClient",
     MaxKeys: 5
   };
-  const objects = await s3Client.listObjectsV2(params).promise();
-  console.log('objects ', objects)
+  //const objects = await s3Client.listObjectsV2(params).promise();
+  //console.log('objects ', objects)
   return {
     statusCode: 200,
     data: [{ 'photo': 'Aqui van las fotos' }]
