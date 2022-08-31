@@ -19,7 +19,8 @@
                 "lambda:GetFunction",
                 "lambda:CreateFunction",
                 "lambda:UpdateFunctionCode",
-                "lambda:DeleteFunction"
+                "lambda:DeleteFunction",
+                "lambda:AddPermission"
             ],
             "Resource":[
                 "arn:aws:lambda:*:547749462802:function:*"
