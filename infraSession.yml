@@ -3,6 +3,7 @@ Resources:
   LambdaFunction:
     Type: 'AWS::Lambda::Function'
     Properties:
+      Timeout: 10
       Code:
         ZipFile: |
           console.log('Loading DynamoDB Lambda function');
