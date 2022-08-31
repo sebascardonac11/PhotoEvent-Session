@@ -56,10 +56,11 @@ async function getSessionsPhotos(email) {
 }
 async function setSessions(body,photographer) {
   try {
-    body.photographer=photographer
+    var  Item =JSON.parse(body);
+      Item.photographer=photographer
     var params = {
       TableName: "photoEvent-Dynamo-session",
-      Item: body
+      Item: Item
     }
     console.log("param: ", params)
     var result = await dynamo.put(params).promise();

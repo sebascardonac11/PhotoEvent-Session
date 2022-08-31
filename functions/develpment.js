@@ -4,8 +4,8 @@ const s3Client = new AWS.S3();
 
 const jwt_decode = require('jwt-decode');
 //const event = require('./requesExample');
-const event = require('./requestExampleGetPhotos');
-
+//const event = require('./requestExampleGetPhotos');
+const event = require('./requestExamplePOST');
 
 handler(event);
 
@@ -25,6 +25,10 @@ async function handler(event) {
             //this.data = await putPhoto(authorizationDecoded.email, event.body);
             //console.log("Event contenttype",event.`content-type`)
             break;
+        case 'POST':
+            console.log("### POST ####")
+            this.data = await setSessions(event.body,authorizationDecoded.email);
+            break;           
         default:
         // code
     }
@@ -41,6 +45,23 @@ async function handler(event) {
     };
 };
 
+async function setSessions(body,photographer) {
+    try {
+      var  Item =JSON.parse(body);
+      Item.photographer=photographer
+      var params = {
+        TableName: "photoEvent-Dynamo-session",
+        Item: Item
+      }
+      console.log("param: ", params)
+      var result = await dynamo.put(params).promise();
+      
+      return result;
+    } catch (error) {
+      console.log("Someting Wrong creating sessions", error)
+      return error;
+    }
+  }
 async function getSessionsPhotos(email) {
     var params = {
         Bucket: "photoevent", 
