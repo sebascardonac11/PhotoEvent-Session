@@ -22,7 +22,6 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: CloudFormation
         run: |
-            echo ':set-output name=stackId::$(
             aws cloudformation create-stack --stack-name PhotoEvents-Session --capabilities CAPABILITY_NAMED_IAM --template-body file://./infraSession.yml \
             --parameters \
             ParameterKey=LambdaFuncName,ParameterValue='photoEvent-lambda-session' \
@@ -31,7 +30,10 @@ jobs:
             ParameterKey=ApiPathName,ParameterValue='API-photoEvent-session' \
             ParameterKey=APIDesc,ParameterValue='Api disenada para los servicios de sesiones.' \
             ParameterKey=CognitoARN,ParameterValue='arn:aws:cognito-idp:us-west-2:547749462802:userpool/us-west-2_VCd4MZ9X8' \
-            ParameterKey=EnvironmentName,ParameterValue='QA' > stackID.md )
+            ParameterKey=EnvironmentName,ParameterValue='QA' > stackID.md
+      - name: STACK ID
+        run: echo "::set-output name=stackID::$(head -1 stackID.md)"
+        run: echo "steps.CloudFormation.outputs"
       - name: Complete STACK
         run: |
           echo '::warning:: This is a warning message, to demonstrate that commands are being processed.'
