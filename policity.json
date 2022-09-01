@@ -5,7 +5,6 @@
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
-                "s3:ListBucket",
                 "s3:PutObject"
             ],
             "Resource": [
@@ -33,7 +32,8 @@
                 "apigateway:POST",
                 "apigateway:DELETE",
                 "apigateway:GET",
-                "apigateway:PUT"
+                "apigateway:PUT",
+                "s3:ListBucket"
             ],
             "Resource": "*"
         },
