@@ -31,7 +31,7 @@ jobs:
             ParameterKey=EnvironmentName,ParameterValue=$enviromentName
       - name: Deploying Stack 
         run: |
-          sleep 1m
+          sleep 3m
       #- name: Complete STACK
       #  run: |
       #    aws cloudformation wait stack-create-complete \
