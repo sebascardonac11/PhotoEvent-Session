@@ -24,10 +24,10 @@ Resources:
       TableName:
         Ref: DynamoDBTableName
       AttributeDefinitions:
-        - AttributeName: id
+        - AttributeName: photographer
           AttributeType: S
       KeySchema:
-        - AttributeName: id
+        - AttributeName: photographer
           KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: '5'

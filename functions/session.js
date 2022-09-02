@@ -39,7 +39,7 @@ module.exports = class Session {
             }
         }
     }
-    async setSessions(body, photographer) {
+    async setSession(body, photographer) {
         try {
             var Item = JSON.parse(body);
             Item.photographer = photographer

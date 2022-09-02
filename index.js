@@ -18,7 +18,7 @@ exports.handler = async function (event, context, callback) {
       break;
     case 'POST':
       console.log("### POST ####")
-      this.response = await session.setSessions(event.body, authorizationDecoded.email);
+      this.response = await session.setSession(event.body, authorizationDecoded.email);
       break;
     default:
     // code
