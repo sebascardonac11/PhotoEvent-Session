@@ -68,9 +68,12 @@ module.exports = class Session {
     }
     async putPhoto(email, data, fileName) {
         try {
+            const parsedBody=JSON.parse(data);
+            const base64File =parsedBody.file;
+            const decodedFile = Buffer.from(base64File.replace(/^data:image\/\w+;base64,/,""),'base64');
             const params = {
                 Bucket: 'photoevent/photoClient',
-                Body: JSON.stringify(data),
+                Body: decodedFile,
                 Key: fileName,
                 ContentType: 'image/jpeg',
                 Metadata: {
