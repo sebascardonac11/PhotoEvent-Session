@@ -68,17 +68,17 @@ module.exports = class Session {
     }
     async putPhoto(email, data, fileName) {
         try {
-            let buff = Buffer.from(data, 'utf-8');
+            
             const params = {
                 Bucket: 'photoevent/photoClient',
-                Body: buff.toString('base64'),
+                Body: data,
                 Key: fileName,
                 ContentType: 'image/jpeg',
                 Metadata: {
                     "Photographer": email
                 }
             };
-            const newData = await s3Client.upload(params).promise();
+            const newData = await s3Client.getSignedUrlPromise('putObject',params).promise();
             return {
                 statusCode: 201,
                 data: "Upload Successfull"
