@@ -8,7 +8,7 @@ exports.handler = async function (event, context, callback) {
   switch (event.httpMethod) {
     case 'GET':
       if (event.resource == '/photoEvent-sessions') {
-        this.response = await session.getSessions(authorizationDecoded.email);
+        this.response = await session.getSessions(authorizationDecoded.email,event.queryStringParameters.event);
       } else {
         this.response = await session.getSessionsPhotos(authorizationDecoded.email);
       }

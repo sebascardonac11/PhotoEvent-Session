@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-    //AWS.config.update({ region: 'us-east-2' });
+    AWS.config.update({ region: 'us-east-2' });
 const s3Client = new AWS.S3();
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -19,13 +19,15 @@ module.exports = class Session {
             data: [{ 'photo': 'Aqui van las fotos' }]
         }
     }
-    async getSessions(email) {
+    async getSessions(email,event) {
         try {
             var params = {
                 TableName: 'photoEvent-Dynamo-session',
                 KeyConditionExpression: 'photographer =:s',
+                FilterExpression:'event = :e',
                 ExpressionAttributeValues: {
-                    ':s': email
+                    ':s': email,
+                    ':e': event
                   }
               };
               var result = await dynamo.query(params).promise();

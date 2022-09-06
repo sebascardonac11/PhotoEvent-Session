@@ -71,8 +71,8 @@ module.exports = {
     'X-Forwarded-Port': [ '443' ],
     'X-Forwarded-Proto': [ 'https' ]
   },
-  queryStringParameters: null,
-  multiValueQueryStringParameters: null,
+  queryStringParameters: { event: 'GP Colombia PRO' },
+  multiValueQueryStringParameters: { event: [ 'GP Colombia PRO' ] },
   pathParameters: { id: '1' },
   stageVariables: null,
   requestContext: {
