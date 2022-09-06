@@ -2,7 +2,7 @@ const Session = require('./functions/session');
 const jwt_decode = require('jwt-decode');
 
 exports.handler = async function (event, context, callback) {
-  //console.log("Event: ", event);
+  console.log("Event: ", event);
   var session=new Session();
   var authorizationDecoded = jwt_decode(event.headers.Authorization);
   switch (event.httpMethod) {
