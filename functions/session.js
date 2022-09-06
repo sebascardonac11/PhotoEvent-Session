@@ -69,10 +69,10 @@ module.exports = class Session {
     }
     async putPhoto(email, data, fileName) {
         try {
-            //const fileContent = fs.readFileSync(data);
+            const fileContent = fs.readFileSync(data);
             const params = {
                 Bucket: 'photoevent/photoClient',
-                Body: data,
+                Body: fileContent,
                 Key: fileName,
                 ContentType: 'image/jpeg',
                 Metadata: {
