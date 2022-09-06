@@ -24,7 +24,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: CloudFormation
         run: |
-            aws cloudformation create-stack --stack-name PhotoEvents-Session --capabilities CAPABILITY_NAMED_IAM --template-body file://./infraSession.yml \
+            aws cloudformation update-stack --stack-name PhotoEvents-Session --capabilities CAPABILITY_NAMED_IAM --template-body file://./infraSession.yml \
             --parameters \
             ParameterKey=LambdaFuncName,ParameterValue=${{ secrets.LAMBDAFUNCNAME }} \
             ParameterKey=CognitoARN,ParameterValue='arn:aws:cognito-idp:us-west-2:547749462802:userpool/us-west-2_VCd4MZ9X8' \
