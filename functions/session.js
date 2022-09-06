@@ -69,17 +69,17 @@ module.exports = class Session {
     }
     async putPhoto(email, data, fileName) {
         try {
-            const fileContent = fs.readFileSync(data);
+            //const fileContent = fs.readFileSync(data);
             const params = {
                 Bucket: 'photoevent/photoClient',
-                Body: fileContent,
+                Body: data,
                 Key: fileName,
                 ContentType: 'image/jpeg',
                 Metadata: {
                     "Photographer": email
                 }
             };
-            const newData = await s3Client.putObject(params).promise();
+            const newData = await s3Client.upload(params).promise();
             return {
                 statusCode: 201,
                 data: "Upload Successfull"
