@@ -1,7 +1,6 @@
 const AWS = require('aws-sdk');
-    AWS.config.update({ region: 'us-east-2' });
+   // AWS.config.update({ region: 'us-east-2' });
 const s3Client = new AWS.S3();
-const fs = require('fs');
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 module.exports = class Session {
@@ -69,10 +68,9 @@ module.exports = class Session {
     }
     async putPhoto(email, data, fileName) {
         try {
-            const fileContent = fs.readFileSync(data);
             const params = {
                 Bucket: 'photoevent/photoClient',
-                Body: fileContent,
+                Body: JSON.stringify(data),
                 Key: fileName,
                 ContentType: 'image/jpeg',
                 Metadata: {
