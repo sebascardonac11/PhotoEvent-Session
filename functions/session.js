@@ -70,7 +70,7 @@ module.exports = class Session {
         try {
             const params = {
                 Bucket: 'photoevent/photoClient',
-                Body: JSON.stringify(data),
+                Body: data.buffer,
                 Key: fileName,
                 ContentType: 'image/jpeg',
                 Metadata: {
