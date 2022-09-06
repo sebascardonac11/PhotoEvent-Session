@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
     AWS.config.update({ region: 'us-east-2' });
 const s3Client = new AWS.S3();
+const fs = require('fs');
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 module.exports = class Session {
@@ -68,10 +69,10 @@ module.exports = class Session {
     }
     async putPhoto(email, data, fileName) {
         try {
-            //const decodedFile = Buffer.from(data.replace(/^data:image\/\w+;base64,/,""),'base64');
+            const fileContent = fs.readFileSync(data);
             const params = {
                 Bucket: 'photoevent/photoClient',
-                Body: data,
+                Body: fileContent,
                 Key: fileName,
                 ContentType: 'image/jpeg',
                 Metadata: {
@@ -81,13 +82,13 @@ module.exports = class Session {
             const newData = await s3Client.putObject(params).promise();
             return {
                 statusCode: 201,
-                data: data
+                data: "Upload Successfull"
             }
         } catch (error) {
             console.log("Something wrong in putPhoto: ", error)
             return {
                 statusCode: 404,
-                data: data
+                data: "Upload Error"
             }
         }
     }
