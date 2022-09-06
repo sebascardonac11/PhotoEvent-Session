@@ -79,6 +79,9 @@ module.exports = class Session {
                 }
             };
             const newData =  s3Client.getSignedUrlPromise('putObject',params);
+            newData.then(function(url) {
+                console.log('The URL is', url);
+              }, function(err) { console.log("Error",err)});
             return {
                 statusCode: 201,
                 data: "Upload Successfull"
