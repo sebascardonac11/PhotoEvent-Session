@@ -78,7 +78,7 @@ module.exports = class Session {
                     "Photographer": email
                 }
             };
-            const newData = await s3Client.getSignedUrlPromise('putObject',params).promise();
+            const newData =  s3Client.getSignedUrlPromise('putObject',params);
             return {
                 statusCode: 201,
                 data: "Upload Successfull"
