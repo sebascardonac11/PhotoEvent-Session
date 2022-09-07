@@ -68,8 +68,8 @@ module.exports = class Session {
     }
     async putPhoto(email, data, fileName) {
         try {
-            console.log("imagen: ",data)
-            var buf = Buffer.from(data.replace(/^data:image\/\w+;base64,/, ""),"base64");
+           // console.log("imagen: ",data)
+            var buf = Buffer.from(data,"base64");
             const params = {
                 Bucket: 'photoevent/photoClient',
                 Body: buf,
