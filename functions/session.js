@@ -69,10 +69,9 @@ module.exports = class Session {
     async putPhoto(email, data, fileName) {
         try {
            // console.log("imagen: ",data)
-            var buf = Buffer.from(data,"base64");
             const params = {
                 Bucket: 'photoevent/photoClient',
-                Body: buf,
+                Body: data,
                 Key: fileName,
                 ContentType: 'image/jpeg',
                 Metadata: {
@@ -80,6 +79,7 @@ module.exports = class Session {
                 }
             };
             const newData = await s3Client.upload(params).promise();
+            console.log("Upload: ",newData)
             return {
                 statusCode: 201,
                 data: { 'Upload': '200' }
