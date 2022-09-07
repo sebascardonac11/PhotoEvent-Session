@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-   // AWS.config.update({ region: 'us-east-2' });
+// AWS.config.update({ region: 'us-east-2' });
 const s3Client = new AWS.S3();
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -19,18 +19,18 @@ module.exports = class Session {
             data: [{ 'photo': 'Aqui van las fotos' }]
         }
     }
-    async getSessions(email,event) {
+    async getSessions(email, event) {
         try {
             var params = {
                 TableName: 'photoEvent-Dynamo-session',
                 KeyConditionExpression: 'photographer =:s',
-                FilterExpression:'event = :e',
+                FilterExpression: 'event = :e',
                 ExpressionAttributeValues: {
                     ':s': email,
                     ':e': event
-                  }
-              };
-              var result = await dynamo.query(params).promise();
+                }
+            };
+            var result = await dynamo.query(params).promise();
             var data = result.Items;
             return {
                 statusCode: 200,
@@ -68,23 +68,19 @@ module.exports = class Session {
     }
     async putPhoto(email, data, fileName) {
         try {
-            
             const params = {
                 Bucket: 'photoevent/photoClient',
-                Body: data,
+                Body: JSON.stringify(data),
                 Key: fileName,
                 ContentType: 'image/jpeg',
                 Metadata: {
                     "Photographer": email
                 }
             };
-            const newData =  s3Client.getSignedUrlPromise('putObject',params);
-            newData.then(function(url) {
-                console.log('The URL is', url);
-              }, function(err) { console.log("Error",err)});
+            const newData = await s3Client.putObject(params).promise();
             return {
                 statusCode: 201,
-                data: "Upload Successfull"
+                data: data
             }
         } catch (error) {
             console.log("Something wrong in putPhoto: ", error)
