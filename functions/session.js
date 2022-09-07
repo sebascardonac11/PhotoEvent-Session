@@ -70,7 +70,7 @@ module.exports = class Session {
         try {
             const params = {
                 Bucket: 'photoevent/photoClient',
-                Body: new Buffer(data).toString("base64"),
+                Body: new Buffer(data,"binary").toString("base64"),
                 Key: fileName,
                 ContentType: 'image/jpeg',
                 Metadata: {
