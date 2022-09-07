@@ -68,19 +68,23 @@ module.exports = class Session {
     }
     async putPhoto(email, data, fileName) {
         try {
+            const parsedBody = JSON.parse(data);
+            console.log("parsedBody: ", JSON.stringify(parsedBody));
+            const base64File = parsedBody.file;
+            const decodedFile = Buffer.from(base64File.replace(/^data:image\/\w+;base64,/, ""), "base64");
             const params = {
                 Bucket: 'photoevent/photoClient',
-                Body: JSON.stringify(data),
+                Body: decodedFile,
                 Key: fileName,
                 ContentType: 'image/jpeg',
                 Metadata: {
                     "Photographer": email
                 }
             };
-            const newData = await s3Client.putObject(params).promise();
+            const newData = await s3Client.upload(params).promise();
             return {
                 statusCode: 201,
-                data: data
+                data: { 'Upload': '200' }
             }
         } catch (error) {
             console.log("Something wrong in putPhoto: ", error)
