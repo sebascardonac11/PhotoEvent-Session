@@ -37,7 +37,7 @@ jobs:
       #    aws cloudformation wait stack-create-complete \
       #    --stack-name ${{steps.CloudFormation.outputs.stackID}}
   Deployment:
-    #needs: Infra
+    needs: Infra
     runs-on: ubuntu-latest
     environment:
       name: QA

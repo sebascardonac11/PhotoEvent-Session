@@ -7,16 +7,24 @@ module.exports = class Session {
     constructor() {
     }
     async getSessionsPhotos(key) {
-        var params = {
-            Bucket: "photoevent",
-            Prefix: key,
-            MaxKeys: 5
-        };
-        const objects = await s3Client.listObjectsV2(params).promise();
-        console.log('objects ', objects)
-        return {
-            statusCode: 200,
-            data: [{ 'photo': 'Aqui van las fotos' }]
+        try {
+            var params = {
+                Bucket: "photoevent",
+                Prefix: key,
+                MaxKeys: 5
+            };
+            const objects = await s3Client.listObjectsV2(params).promise();
+            
+            console.log('objects ', objects)
+            return {
+                statusCode: 200,
+                data: objects.Contents
+            }
+        } catch (error) {
+            return {
+                statusCode: 404,
+                data: error
+            }
         }
     }
     async getSessions(email, event) {
@@ -66,7 +74,7 @@ module.exports = class Session {
             };
         }
     }
-    async putPhoto(fileName,contentType,body,email) {
+    async putPhoto(fileName, contentType, body, email) {
         try {
             var filePath = "photoClient/" + fileName
             var params = {

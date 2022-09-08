@@ -430,8 +430,11 @@ Resources:
                 Action:
                   - 's3:PutObject'
                   - 's3:GetObject'
+                  - 's3:ListBucket'
                   - 's3:PutObjectTagging'
-                Resource: 'arn:aws:s3:::photoevent/*'        
+                Resource: 
+                  - 'arn:aws:s3:::photoevent/*'
+                  - 'arn:aws:s3:::photoevent'    
 Parameters:
   LambdaFuncName:
     Type: String
