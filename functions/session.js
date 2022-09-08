@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 // AWS.config.update({ region: 'us-east-2' });
+const parser = require('lambda-multipart-parser');
 const s3Client = new AWS.S3();
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -66,30 +67,35 @@ module.exports = class Session {
             };
         }
     }
-    async putPhoto(email, data, fileName) {
+    async putPhoto(event) {
+        const result = await parser.parse(event);
+        console.log(result.files);
         try {
-           // console.log("imagen: ",data)
-            const params = {
-                Bucket: 'photoevent/photoClient',
-                Body: data,
-                Key: fileName,
-                ContentType: 'image/jpeg',
-                Metadata: {
-                    "Photographer": email
-                }
+            var filePath = "photoClient/" + result.files[0].filename
+            var params = {
+                "Bucket": "photoevent",
+                "Body": new Buffer(result.files[0].content),
+                "Key": filePath,
+                "ContentType ": result.files[0].contentType
             };
-            const newData = await s3Client.upload(params).promise();
-            console.log("Upload: ",newData)
+    
+            await s3Client.upload(params).promise();
+        } catch (e) {
+            console.log(e)
             return {
-                statusCode: 201,
-                data: { 'Upload': '200' }
-            }
-        } catch (error) {
-            console.log("Something wrong in putPhoto: ", error)
-            return {
-                statusCode: 404,
-                data: "Upload Error"
+                error: e
             }
         }
+        return {
+            statusCode: 200,
+            body: JSON.stringify(
+                {
+                    message: result.files,
+                    input: event,
+                },
+                null,
+                2
+            ),
+        };
     }
 }
