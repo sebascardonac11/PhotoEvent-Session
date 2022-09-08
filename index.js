@@ -1,5 +1,6 @@
 const Session = require('./functions/session');
 const jwt_decode = require('jwt-decode');
+const parser = require('lambda-multipart-parser');
 
 exports.handler = async function (event, context, callback) {
   console.log("Event: ", event);
@@ -14,7 +15,8 @@ exports.handler = async function (event, context, callback) {
       }
       break;
     case 'PUT':
-      this.response = await session.putPhoto(authorizationDecoded.email, event.body, event.queryStringParameters.fileName);
+      const result = await parser.parse(event);
+      this.response = await session.putPhoto(authorizationDecoded.email, new Buffer(result.files[0].content), result.files[0].filename);
       break;
     case 'POST':
       console.log("### POST ####")
