@@ -323,7 +323,7 @@ Resources:
             method.response.header.Access-Control-Allow-Headers: true
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true  
-  ApiGwSesssionIdOpt:
+  ApiGwPhotoOpt:
     Type: AWS::ApiGateway::Method
     Properties:
       ResourceId: !Ref APIGwResorceSessionIdPhotosAdd
