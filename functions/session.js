@@ -15,14 +15,14 @@ module.exports = class Session {
                 MaxKeys: 5
             };
             const objects = await s3Client.listObjectsV2(params).promise();
-            objects.Contents.forEach(element => {
+            for (const i in objects.Contents){
                 const presignedURL = s3Client.getSignedUrl('getObject', {
                     Bucket: this.bucketName,
-                    Key: element.Key,
-                    Expires: 10000
+                    Key: bjects.Contents[i],
+                    Expires: 10
                 });
-                console.log('URL: ',presignedURL);
-            });
+                objects.Contents[i].url=presignedURL;
+            }
             console.log('objects ', objects)
             return {
                 statusCode: 200,
