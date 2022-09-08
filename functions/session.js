@@ -74,7 +74,7 @@ module.exports = class Session {
             var filePath = "photoClient/" + result.files[0].filename
             var params = {
                 "Bucket": "photoevent",
-                "Body": Buffer.from(result.files[0].content.replace(/^data:image\/\w+;base64,/, ""),"base64"),
+                "Body": Buffer.from(result.files[0].content,"base64"),
                 "Key": filePath,
                 "ContentType": result.files[0].contentType
             };
