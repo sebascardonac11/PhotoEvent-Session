@@ -1,6 +1,5 @@
 const AWS = require('aws-sdk');
 // AWS.config.update({ region: 'us-east-2' });
-const parser = require('lambda-multipart-parser');
 const s3Client = new AWS.S3();
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -67,16 +66,14 @@ module.exports = class Session {
             };
         }
     }
-    async putPhoto(event) {
-        const result = await parser.parse(event);
-        console.log("contenido:",result.files);
+    async putPhoto(fileName,ContentType,body) {
         try {
-            var filePath = "photoClient/" + result.files[0].filename
+            var filePath = "photoClient/" + fileName
             var params = {
                 "Bucket": "photoevent",
-                "Body": Buffer.from(result.files[0].content),
+                "Body": body,
                 "Key": filePath,
-                "ContentType": result.files[0].contentType
+                "ContentType": ContentType
             };
     
             var photo = await s3Client.upload(params).promise();

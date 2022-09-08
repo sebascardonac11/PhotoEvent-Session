@@ -1,21 +1,22 @@
 const Session = require('./functions/session');
 const jwt_decode = require('jwt-decode');
-
+const parser = require('lambda-multipart-parser');
 
 exports.handler = async function (event, context, callback) {
   console.log("Event: ", event);
-  var session=new Session();
+  var session = new Session();
   var authorizationDecoded = jwt_decode(event.headers.Authorization);
   switch (event.httpMethod) {
     case 'GET':
       if (event.resource == '/photoEvent-sessions') {
-        this.response = await session.getSessions(authorizationDecoded.email,event.queryStringParameters.event);
+        this.response = await session.getSessions(authorizationDecoded.email, event.queryStringParameters.event);
       } else {
         this.response = await session.getSessionsPhotos(authorizationDecoded.email);
       }
       break;
     case 'PUT':
-      this.response = await session.putPhoto(event);
+        const form = await parser.parse(event);
+        this.response = await session.putPhoto(event,form.files[0].filename,result.files[0].contentType,Buffer.from(result.files[0].content));
       break;
     case 'POST':
       console.log("### POST ####")
@@ -24,7 +25,7 @@ exports.handler = async function (event, context, callback) {
     default:
     // code
   }
-  console.log("Response: ",this.response);
+  console.log("Response: ", this.response);
   return {
     statusCode: this.response.statusCode,
     headers: {
