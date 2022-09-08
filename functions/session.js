@@ -16,7 +16,7 @@ module.exports = class Session {
             };
             const objects = await s3Client.listObjectsV2(params).promise();
             objects.Contents.forEach(element => {
-                const presignedURL = s3.getSignedUrl('getObject', {
+                const presignedURL = s3Client.getSignedUrl('getObject', {
                     Bucket: this.bucketName,
                     Key: element.Key,
                     Expires: 10000
