@@ -81,9 +81,10 @@ module.exports = class Session {
     
             await s3Client.upload(params).promise();
         } catch (e) {
-            console.log(e)
+            console.log("error",e)
             return {
-                error: e
+                statusCode: 404,
+                data: e
             }
         }
         return {
