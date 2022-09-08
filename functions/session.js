@@ -69,7 +69,7 @@ module.exports = class Session {
     }
     async putPhoto(event) {
         const result = await parser.parse(event);
-        console.log(result.files);
+        console.log("contenido: ",result.files);
         try {
             var filePath = "photoClient/" + result.files[0].filename
             var params = {
