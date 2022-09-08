@@ -453,4 +453,4 @@ Parameters:
     Default: 'arn:aws:cognito-idp:us-west-2:547749462802:userpool/us-west-2_VCd4MZ9X8'
   EnvironmentName:
     Type: String
-    Default: Prod
+    Default: dev
