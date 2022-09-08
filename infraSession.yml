@@ -48,6 +48,9 @@ Resources:
         Ref: APIName
       Description:
         Ref: APIDesc
+      BinaryMediaTypes:
+        - image/jpeg
+        - multipart/form-data
     DependsOn:
       - LambdaFunction
   APIGatewayResource:
@@ -203,6 +206,8 @@ Resources:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             ResponseTemplates:
               application/json: ''
+              multipart/form-data: 'Empty'
+              image/jpeg: 'Empty'
         PassthroughBehavior: WHEN_NO_MATCH
         RequestTemplates:
           application/json: '{"statusCode": 200}'
@@ -227,6 +232,10 @@ Resources:
       AuthorizerId: !Ref APIGatewayAuthorizer
       RequestParameters:
         method.request.path.proxy: true
+      RequestModels :
+        application/json:     'Empty'
+        multipart/form-data:  'Empty'
+        image/jpeg:           'Empty'
       RestApiId: !Ref APIGatewayRestAPI
       Integration:
         Type: AWS_PROXY
@@ -237,6 +246,8 @@ Resources:
           - LambdaFuncNameArn: !GetAtt LambdaFunction.Arn  
         RequestTemplates:
           application/json: $input.json('$')
+          multipart/form-data: $input.json('$')
+          image/jpeg: $input.json('$')
         IntegrationResponses:
           - StatusCode: 200
         IntegrationResponses:

@@ -66,26 +66,28 @@ module.exports = class Session {
             };
         }
     }
-    async putPhoto(fileName,ContentType,body) {
+    async putPhoto(fileName,contentType,body,email) {
         try {
             var filePath = "photoClient/" + fileName
             var params = {
-                "Bucket": "photoevent",
-                "Body": body,
-                "Key": filePath,
-                "ContentType": ContentType
+                Bucket: "photoevent",
+                Body: body,
+                Key: filePath,
+                ContentType: contentType,
+                Metadata: {
+                    "Photographer": email
+                }
             };
-    
             var photo = await s3Client.upload(params).promise();
             return {
                 statusCode: 200,
                 data: photo
             }
-        } catch (e) {
-            console.log("error",e)
+        } catch (error) {
+            console.log("Something wrong in session.putPhoto: ", error)
             return {
                 statusCode: 404,
-                data: e
+                data: error
             }
         }
     }
