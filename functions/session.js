@@ -67,27 +67,28 @@ module.exports = class Session {
             };
         }
     }
-    async putPhoto(email, data, fileName) {
+    async putPhoto(event) {
+        const result = await parser.parse(event);
+        console.log("contenido:",result.files);
         try {
-            const params = {
-                Bucket: 'photoevent/photoClient',
-                Body: data,
-                Key: fileName,
-                ContentType: 'image/jpeg',
-                Metadata: {
-                    "Photographer": email
-                }
+            var filePath = "photoClient/" + result.files[0].filename
+            var params = {
+                "Bucket": "photoevent",
+                "Body": new Buffer(result.files[0].content),
+                "Key": filePath,
+                "ContentType": result.files[0].contentType
             };
-            const newData = await s3Client.upload(params).promise();
+    
+            var photo = await s3Client.upload(params).promise();
             return {
-                statusCode: 201,
-                data: data
+                statusCode: 200,
+                data: photo
             }
-        } catch (error) {
-            console.log("Something wrong in putPhoto: ", error)
+        } catch (e) {
+            console.log("error",e)
             return {
                 statusCode: 404,
-                data: data
+                data: e
             }
         }
     }
