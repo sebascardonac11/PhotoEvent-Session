@@ -13,7 +13,7 @@ module.exports.uploadSessionImage = async (event) => {
             "Body": new Buffer(result.files[0].content),
             "Bucket": "sebas-poc-images-fuck-bitch",
             "Key": filePath,
-            "ContentType ": result.files[0].contentType
+            "ContentType ": 'image/jpeg'
         };
 
         await s3.upload(params).promise();
