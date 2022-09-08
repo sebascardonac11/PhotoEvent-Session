@@ -76,7 +76,7 @@ module.exports = class Session {
                 "Bucket": "photoevent",
                 "Body": result.files[0].content,
                 "Key": filePath,
-                "ContentType ": result.files[0].contentType
+                "ContentType": result.files[0].contentType
             };
     
             await s3Client.upload(params).promise();
