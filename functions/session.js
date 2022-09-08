@@ -71,14 +71,14 @@ module.exports = class Session {
         try {
             const params = {
                 Bucket: 'photoevent/photoClient',
-                Body: JSON.stringify(data),
+                Body: data,
                 Key: fileName,
                 ContentType: 'image/jpeg',
                 Metadata: {
                     "Photographer": email
                 }
             };
-            const newData = await s3Client.putObject(params).promise();
+            const newData = await s3Client.upload(params).promise();
             return {
                 statusCode: 201,
                 data: data
