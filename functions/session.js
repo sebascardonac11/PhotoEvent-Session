@@ -18,7 +18,7 @@ module.exports = class Session {
             for (const i in objects.Contents){
                 const presignedURL = s3Client.getSignedUrl('getObject', {
                     Bucket: this.bucketName,
-                    Key: objects.Contents[i],
+                    Key: objects.Contents[i].Key,
                     Expires: 10
                 });
                 objects.Contents[i].url=presignedURL;
