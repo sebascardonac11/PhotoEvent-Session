@@ -6,14 +6,14 @@ const dynamo = new AWS.DynamoDB.DocumentClient();
 module.exports = class Session {
     constructor() {
     }
-    async getSessionsPhotos(email) {
+    async getSessionsPhotos(key) {
         var params = {
             Bucket: "photoevent",
-            Prefix: "photoClient",
+            Prefix: key,
             MaxKeys: 5
         };
-        //const objects = await s3Client.listObjectsV2(params).promise();
-        //console.log('objects ', objects)
+        const objects = await s3Client.listObjectsV2(params).promise();
+        console.log('objects ', objects)
         return {
             statusCode: 200,
             data: [{ 'photo': 'Aqui van las fotos' }]
