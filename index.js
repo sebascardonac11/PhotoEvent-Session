@@ -16,8 +16,9 @@ exports.handler = async function (event, context, callback) {
       break;
     case 'PUT':
         const form = await parser.parse(event);
-        console.log("Form: ",form)
-        this.response = await session.putPhoto(form.files[0].filename,form.files[0].contentType,Buffer.from(form.files[0].content),authorizationDecoded.email);
+        var key = form.event+'/'+form.files[0].filename;
+        console.log("key: ",key)
+        this.response = await session.putPhoto(key,form.files[0].contentType,Buffer.from(form.files[0].content),authorizationDecoded.email);
       break;
     case 'POST':
       console.log("### POST ####")
