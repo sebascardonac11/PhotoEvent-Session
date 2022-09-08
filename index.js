@@ -15,10 +15,14 @@ exports.handler = async function (event, context, callback) {
       }
       break;
     case 'PUT':
-        const form = await parser.parse(event);
-        var key = form.event+'/'+form.session+'/'+form.files[0].filename;
-        console.log("key: ",key)
-        this.response = await session.putPhoto(key,form.files[0].contentType,Buffer.from(form.files[0].content),authorizationDecoded.email);
+      console.log("### PUT ####");
+      const form = await parser.parse(event);
+      form.files.array.forEach(file => {
+        var key = form.event + '/' + form.session + '/' + file.filename;
+        var contenType = file.contentType;
+        var body = Buffer.from(file.content);
+        this.response += await session.putPhoto(key, contenType, body, authorizationDecoded.email);
+      });
       break;
     case 'POST':
       console.log("### POST ####")
@@ -27,7 +31,6 @@ exports.handler = async function (event, context, callback) {
     default:
     // code
   }
-  console.log("Response: ", this.response);
   return {
     statusCode: this.response.statusCode,
     headers: {
