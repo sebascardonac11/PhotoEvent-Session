@@ -17,7 +17,7 @@ exports.handler = async function (event, context, callback) {
     case 'PUT':
       console.log("### PUT ####");
       const form = await parser.parse(event);
-      form.files.array.forEach(async file => {
+      form.files.forEach(async file => {
         var key = form.event + '/' + form.session + '/' + file.filename;
         var contenType = file.contentType;
         var body = Buffer.from(file.content);
