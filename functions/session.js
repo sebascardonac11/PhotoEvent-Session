@@ -4,6 +4,7 @@ const s3Client = new AWS.S3();
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 module.exports = class Session {
+    bucketName = 'photoevent';
     constructor() {
     }
     async getSessionsPhotos(key) {
@@ -14,7 +15,14 @@ module.exports = class Session {
                 MaxKeys: 5
             };
             const objects = await s3Client.listObjectsV2(params).promise();
-            
+            objects.Contents.forEach(element => {
+                const presignedURL = s3.getSignedUrl('getObject', {
+                    Bucket: this.bucketName,
+                    Key: element.Key,
+                    Expires: 10000
+                });
+                console.log('URL: ',presignedURL);
+            });
             console.log('objects ', objects)
             return {
                 statusCode: 200,
