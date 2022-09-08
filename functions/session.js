@@ -79,7 +79,11 @@ module.exports = class Session {
                 "ContentType": result.files[0].contentType
             };
     
-            await s3Client.upload(params).promise();
+            var photo = await s3Client.upload(params).promise();
+            return {
+                statusCode: 200,
+                data: photo
+            }
         } catch (e) {
             console.log("error",e)
             return {
@@ -87,16 +91,5 @@ module.exports = class Session {
                 data: e
             }
         }
-        return {
-            statusCode: 200,
-            body: JSON.stringify(
-                {
-                    message: result.files,
-                    input: event,
-                },
-                null,
-                2
-            ),
-        };
     }
 }
