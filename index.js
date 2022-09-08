@@ -18,17 +18,10 @@ exports.handler = async function (event, context, callback) {
       case 'PUT':
         console.log("### PUT ####");
         const form = await parser.parse(event);
-        this.response = { statusCode: 200 }
-        form.files.forEach(async file => {
-          var key = form.event + '/' + form.session + '/' + file.filename;
-          var contenType = file.contentType;
-          var body = Buffer.from(file.content);
-          var upphoto = await session.putPhoto(key, contenType, body, authorizationDecoded.email);
-          console.log("UpPhoto: ", upphoto);
-          this.response.data.push(upphoto.data);
-          if (upphoto.statusCode != 200)
-            this.response.statusCode = 201
-        });
+          var key = form.event + '/' + form.session + '/' + form.files[0].filename;
+          var contenType = form.files[0].contentType;
+          var body = Buffer.from(form.files[0].content);
+          this.response = await session.putPhoto(key, contenType, body, authorizationDecoded.email);
         break;
       case 'POST':
         console.log("### POST ####")
