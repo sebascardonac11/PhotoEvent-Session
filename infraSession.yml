@@ -24,11 +24,15 @@ Resources:
       TableName:
         Ref: DynamoDBTableName
       AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
+        - AttributeName: photographer
+          AttributeType: S 
+        - AttributeName: name
+          AttributeType: S           
       KeySchema:
-        - AttributeName: id
+        - AttributeName: photographer
           KeyType: HASH
+        - AttributeName: name
+          KeyType : RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: '5'
         WriteCapacityUnits: '5'
@@ -44,6 +48,9 @@ Resources:
         Ref: APIName
       Description:
         Ref: APIDesc
+      BinaryMediaTypes:
+        - image/jpeg
+        - multipart/form-data
     DependsOn:
       - LambdaFunction
   APIGatewayResource:
@@ -199,6 +206,8 @@ Resources:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             ResponseTemplates:
               application/json: ''
+              multipart/form-data: 'Empty'
+              image/jpeg: 'Empty'
         PassthroughBehavior: WHEN_NO_MATCH
         RequestTemplates:
           application/json: '{"statusCode": 200}'
@@ -223,6 +232,10 @@ Resources:
       AuthorizerId: !Ref APIGatewayAuthorizer
       RequestParameters:
         method.request.path.proxy: true
+      RequestModels :
+        application/json:     'Empty'
+        multipart/form-data:  'Empty'
+        image/jpeg:           'Empty'
       RestApiId: !Ref APIGatewayRestAPI
       Integration:
         Type: AWS_PROXY
@@ -233,6 +246,8 @@ Resources:
           - LambdaFuncNameArn: !GetAtt LambdaFunction.Arn  
         RequestTemplates:
           application/json: $input.json('$')
+          multipart/form-data: $input.json('$')
+          image/jpeg: $input.json('$')
         IntegrationResponses:
           - StatusCode: 200
         IntegrationResponses:
@@ -251,6 +266,93 @@ Resources:
             method.response.header.Access-Control-Allow-Headers: true
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
+  APIGwResorceSessionIdPhotos:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref APIGatewayRestAPI
+      ParentId:  !Ref APIGwResorceSession
+      PathPart: 'photos'
+    DependsOn:
+      - APIGwResorceSession  
+  APIGwResorceSessionIdPhotosAdd:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref APIGatewayRestAPI
+      ParentId:  !Ref APIGwResorceSessionIdPhotos
+      PathPart: '{fileName}'
+    DependsOn:
+      - APIGwResorceSession
+  ApiGwPhotoPut:
+    Type: 'AWS::ApiGateway::Method'
+    DependsOn:
+      - APIGwResorceSessionIdPhotosAdd
+    Properties:
+      ResourceId: !Ref APIGwResorceSessionIdPhotosAdd
+      HttpMethod: PUT
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref APIGatewayAuthorizer
+      RequestParameters:
+        method.request.path.proxy: true
+        method.request.path.fileName : true
+        method.request.header.tagging : false
+      RestApiId: !Ref APIGatewayRestAPI
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: PUT
+        Credentials: !GetAtt IAMRole.Arn
+        Uri: !Sub 
+          - >-
+            arn:aws:apigateway:${AWS::Region}:s3:path/photoevent/photoClient/{fileName}
+          - LambdaFuncNameArn: !GetAtt LambdaFunction.Arn  
+        RequestParameters: 
+          integration.request.path.fileName : method.request.header.fileName
+          integration.request.header.x-amz-tagging : method.request.header.tagging
+        IntegrationResponses:
+          - StatusCode: 200
+        IntegrationResponses:
+          - StatusCode: 200       
+            ResponseParameters:
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true  
+  ApiGwPhotoOpt:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref APIGwResorceSessionIdPhotosAdd
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE      
+      RestApiId: !Ref APIGatewayRestAPI
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+    DependsOn:
+        - APIGwResorceSessionIdPhotosAdd   
   APIGatewayDeployment:
     Type: 'AWS::ApiGateway::Deployment'
     Properties:
@@ -260,6 +362,7 @@ Resources:
     DependsOn:
       - APIGatewayMethod
       - ApiGwAny
+      - ApiGwPhotoPut
   APIGatewayPermission:
     Type: 'AWS::Lambda::Permission'
     Properties:
@@ -317,7 +420,21 @@ Resources:
                 Action:
                   - 's3:PutObject'
                   - 's3:GetObject'
+                  - 's3:PutObjectTagging'
                 Resource: 'arn:aws:s3:::photoevent/*'
+        - PolicyName: Policy_api-S3  
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:  
+              - Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                  - 's3:GetObject'
+                  - 's3:ListBucket'
+                  - 's3:PutObjectTagging'
+                Resource: 
+                  - 'arn:aws:s3:::photoevent/*'
+                  - 'arn:aws:s3:::photoevent'    
 Parameters:
   LambdaFuncName:
     Type: String
@@ -339,4 +456,4 @@ Parameters:
     Default: 'arn:aws:cognito-idp:us-west-2:547749462802:userpool/us-west-2_VCd4MZ9X8'
   EnvironmentName:
     Type: String
-    Default: Prod
+    Default: dev

@@ -1,32 +1,52 @@
 const AWS = require('aws-sdk');
-//AWS.config.update({ region: 'us-east-2' });
+// AWS.config.update({ region: 'us-east-2' });
 const s3Client = new AWS.S3();
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 module.exports = class Session {
+    bucketName = 'photoevent';
     constructor() {
     }
-    async getSessionsPhotos(email) {
-        var params = {
-            Bucket: "photoevent",
-            Prefix: "photoClient",
-            MaxKeys: 5
-        };
-        //const objects = await s3Client.listObjectsV2(params).promise();
-        //console.log('objects ', objects)
-        return {
-            statusCode: 200,
-            data: [{ 'photo': 'Aqui van las fotos' }]
-        }
-    }
-    async getSessions(email) {
+    async getSessionsPhotos(key) {
         try {
             var params = {
-                TableName: "photoEvent-Dynamo-session",
-                FilterExpression: "contains(photographer, :photographer)",
-                ExpressionAttributeValues: { ":photographer": email }
+                Bucket: "photoevent",
+                Prefix: key,
+                MaxKeys: 5
+            };
+            const objects = await s3Client.listObjectsV2(params).promise();
+            for (const i in objects.Contents){
+                const presignedURL = s3Client.getSignedUrl('getObject', {
+                    Bucket: this.bucketName,
+                    Key: objects.Contents[i].Key,
+                    Expires: 10
+                });
+                objects.Contents[i].url=presignedURL;
             }
-            var result = await dynamo.scan(params).promise();
+            console.log('objects ', objects)
+            return {
+                statusCode: 200,
+                data: objects.Contents
+            }
+        } catch (error) {
+            return {
+                statusCode: 404,
+                data: error
+            }
+        }
+    }
+    async getSessions(email, event) {
+        try {
+            var params = {
+                TableName: 'photoEvent-Dynamo-session',
+                KeyConditionExpression: 'photographer =:s',
+                FilterExpression: 'event = :e',
+                ExpressionAttributeValues: {
+                    ':s': email,
+                    ':e': event
+                }
+            };
+            var result = await dynamo.query(params).promise();
             var data = result.Items;
             return {
                 statusCode: 200,
@@ -39,7 +59,7 @@ module.exports = class Session {
             }
         }
     }
-    async setSessions(body, photographer) {
+    async setSession(body, photographer) {
         try {
             var Item = JSON.parse(body);
             Item.photographer = photographer
@@ -62,27 +82,28 @@ module.exports = class Session {
             };
         }
     }
-    async putPhoto(email, data, fileName) {
+    async putPhoto(fileName, contentType, body, email) {
         try {
-            const params = {
-                Bucket: 'photoevent/photoClient',
-                Body: JSON.stringify(data),
-                Key: fileName,
-                ContentType: 'image/jpeg',
+            var filePath = "photoClient/" + fileName
+            var params = {
+                Bucket: "photoevent",
+                Body: body,
+                Key: filePath,
+                ContentType: contentType,
                 Metadata: {
                     "Photographer": email
                 }
             };
-            const newData = await s3Client.putObject(params).promise();
+            var photo = await s3Client.upload(params).promise();
             return {
-                statusCode: 201,
-                data: data
+                statusCode: 200,
+                data: photo
             }
         } catch (error) {
-            console.log("Something wrong in putPhoto: ", error)
+            console.log("Something wrong in session.putPhoto: ", error)
             return {
                 statusCode: 404,
-                data: data
+                data: error
             }
         }
     }
