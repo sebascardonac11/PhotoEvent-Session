@@ -49,7 +49,6 @@ module.exports = class Session {
                 }
             }else
                 params.ExpressionAttributeValues = {':s': email,}
-            console.log("evento: ", params)
             var result = await dynamo.query(params).promise();
             var data = result.Items;
             return {
