@@ -41,7 +41,7 @@ module.exports = class Session {
                 TableName: 'photoEvent-Dynamo-session',
                 KeyConditionExpression: 'photographer =:s',
             };
-            if (event != null){
+            if (event != 'null'){
                 params.FilterExpression= 'event = :e';
                 params.ExpressionAttributeValues = {
                     ':s': email,
