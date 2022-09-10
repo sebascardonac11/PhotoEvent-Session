@@ -40,19 +40,16 @@ module.exports = class Session {
             var params = {
                 TableName: 'photoEvent-Dynamo-session',
                 KeyConditionExpression: 'photographer =:s',
-                FilterExpression: 'event = :e',
             };
-            
-            if (event != null)
+            if (event != null){
+                params.FilterExpression= 'event = :e';
                 params.ExpressionAttributeValues = {
                     ':s': email,
                     ':e': event
                 }
-            else
-                params.ExpressionAttributeValues = {
-                    ':s': email,
-                }
-                console.log("evento: ", params)
+            }else
+                params.ExpressionAttributeValues = {':s': email,}
+            console.log("evento: ", params)
             var result = await dynamo.query(params).promise();
             var data = result.Items;
             return {
