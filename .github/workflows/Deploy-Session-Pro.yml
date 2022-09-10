@@ -22,13 +22,13 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: CloudFormation
-        run: |
-            aws cloudformation create-stack --stack-name PhotoEvents-Session --capabilities CAPABILITY_NAMED_IAM --template-body file://./infraSession.yml \
-            --parameters \
-            ParameterKey=LambdaFuncName,ParameterValue=${{ secrets.LAMBDAFUNCNAME }} \
-            ParameterKey=CognitoARN,ParameterValue='arn:aws:cognito-idp:us-west-2:547749462802:userpool/us-west-2_VCd4MZ9X8' \
-            ParameterKey=EnvironmentName,ParameterValue=$enviromentName
+      #- name: CloudFormation
+      #  run: |
+      #      aws cloudformation update-stack --stack-name PhotoEvents-Session --capabilities CAPABILITY_NAMED_IAM --template-body file://./infraSession.yml \
+      #      --parameters \
+      #      ParameterKey=LambdaFuncName,ParameterValue=${{ secrets.LAMBDAFUNCNAME }} \
+      #      ParameterKey=CognitoARN,ParameterValue='arn:aws:cognito-idp:us-west-2:547749462802:userpool/us-west-2_VCd4MZ9X8' \
+      #      ParameterKey=EnvironmentName,ParameterValue=$enviromentName
       - name: Deploying Stack 
         run: |
           sleep 1m

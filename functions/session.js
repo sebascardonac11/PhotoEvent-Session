@@ -15,13 +15,13 @@ module.exports = class Session {
                 MaxKeys: 5
             };
             const objects = await s3Client.listObjectsV2(params).promise();
-            for (const i in objects.Contents){
+            for (const i in objects.Contents) {
                 const presignedURL = s3Client.getSignedUrl('getObject', {
                     Bucket: this.bucketName,
                     Key: objects.Contents[i].Key,
                     Expires: 10
                 });
-                objects.Contents[i].url=presignedURL;
+                objects.Contents[i].url = presignedURL;
             }
             console.log('objects ', objects)
             return {
@@ -40,12 +40,15 @@ module.exports = class Session {
             var params = {
                 TableName: 'photoEvent-Dynamo-session',
                 KeyConditionExpression: 'photographer =:s',
-                FilterExpression: 'event = :e',
-                ExpressionAttributeValues: {
+            };
+            if (event != 'null'){
+                params.FilterExpression= 'event = :e';
+                params.ExpressionAttributeValues = {
                     ':s': email,
                     ':e': event
                 }
-            };
+            }else
+                params.ExpressionAttributeValues = {':s': email,}
             var result = await dynamo.query(params).promise();
             var data = result.Items;
             return {
