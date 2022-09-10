@@ -46,6 +46,7 @@ module.exports = class Session {
                     ':e': event
                 }
             };
+            console.log("evento: ",event)
             var result = await dynamo.query(params).promise();
             var data = result.Items;
             return {

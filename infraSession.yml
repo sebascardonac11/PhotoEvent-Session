@@ -457,3 +457,7 @@ Parameters:
   EnvironmentName:
     Type: String
     Default: dev
+Outputs:
+  ApiResorceURL: 
+    Description: This is the URL of the resorce of Api.
+    Value: !Ref APIGatewayRestAPI
