@@ -43,7 +43,7 @@ module.exports = class Session {
                 FilterExpression: 'event = :e',
             };
             
-            if (event)
+            if (event != null)
                 params.ExpressionAttributeValues = {
                     ':s': email,
                     ':e': event
