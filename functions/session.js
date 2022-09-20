@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-// AWS.config.update({ region: 'us-east-2' });
+//AWS.config.update({ region: 'us-east-2' });
 const s3Client = new AWS.S3();
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -42,7 +42,7 @@ module.exports = class Session {
         try {
             var params = {
                 TableName: this.DYNAMODBTABLE,
-                KeyConditionExpression: 'Key =:e',
+                KeyConditionExpression: 'mainkey =:e',
             };
             if (event != 'null'){
                 params.FilterExpression= 'photographer  = :s';
@@ -53,6 +53,7 @@ module.exports = class Session {
             }else{
                 params.ExpressionAttributeValues = {':s': email,}
             }
+            console.log(params)
             var result = await dynamo.query(params).promise();
             var data = result.Items;
             return {

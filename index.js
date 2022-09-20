@@ -6,6 +6,7 @@ exports.handler = async function (event, context, callback) {
   try {
     console.log("Event: ", event);
     var session = new Session(process.env.BUCKET, process.env.DYNAMODB);
+    //var session = new Session('photoeventdev', 'photoEvent');
     var authorizationDecoded = jwt_decode(event.headers.Authorization);
     switch (event.httpMethod) {
       case 'GET':
