@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 //AWS.config.update({ region: 'us-east-2' });
 const s3Client = new AWS.S3();
+const Str = require('@supercharge/strings')
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 module.exports = class Session {
@@ -69,8 +70,11 @@ module.exports = class Session {
     }
     async setSession(body, photographer) {
         try {
+            const uuid = Str.uuid() ;
             var Item = JSON.parse(body);
             Item.photographer = photographer
+            Item.mainkey=body.event;
+            Item.mainsort='SESSION#'+uuid;
             var params = {
                 TableName: this.DYNAMODBTABLE,
                 Item: Item
