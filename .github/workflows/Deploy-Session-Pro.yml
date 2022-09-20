@@ -63,3 +63,10 @@ jobs:
             --function-name ${{ secrets.LAMBDAFUNCNAME }} \
             --zip-fil "fileb://./deploy.zip" \
             --region ${{ secrets.AWS_REGION }} \
+      - name: Updating Function 
+        run: |
+          sleep 10
+      - name: Configutation
+        run: |
+          aws lambda update-function-configuration --function-name ${{ secrets.LAMBDAFUNCNAME }} \
+            --environment "Variables={DYNAMODB=photoEvent,BUCKET=photoevent}" 
