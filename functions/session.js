@@ -52,9 +52,9 @@ module.exports = class Session {
                     ':e': event
                 }
             }else{
-                params.ExpressionAttributeValues = {':s': email,}
+              //  params.ExpressionAttributeValues = {':s': email,}
             }
-            console.log(params)
+            //console.log(params)
             var result = await dynamo.query(params).promise();
             var data = result.Items;
             return {
