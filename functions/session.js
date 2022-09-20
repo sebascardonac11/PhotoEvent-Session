@@ -73,7 +73,7 @@ module.exports = class Session {
             const uuid = Str.uuid() ;
             var Item = JSON.parse(body);
             Item.photographer = photographer
-            Item.mainkey=body.event;
+            Item.mainkey=Item.event;
             Item.mainsort='SESSION#'+uuid;
             var params = {
                 TableName: this.DYNAMODBTABLE,
