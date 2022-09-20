@@ -4,8 +4,11 @@ const s3Client = new AWS.S3();
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 module.exports = class Session {
-    bucketName = 'photoevent';
-    constructor() {
+    bucketName;
+    DYNAMODBTABLE;
+    constructor(bucket, table) {
+        this.bucketName = bucket;
+        this.DYNAMODBTABLE = table
     }
     async getSessionsPhotos(key) {
         try {
@@ -38,17 +41,18 @@ module.exports = class Session {
     async getSessions(email, event) {
         try {
             var params = {
-                TableName: 'photoEvent-Dynamo-session',
-                KeyConditionExpression: 'photographer =:s',
+                TableName: this.DYNAMODBTABLE,
+                KeyConditionExpression: 'Key =:e',
             };
             if (event != 'null'){
-                params.FilterExpression= 'event = :e';
+                params.FilterExpression= 'photographer  = :s';
                 params.ExpressionAttributeValues = {
                     ':s': email,
                     ':e': event
                 }
-            }else
+            }else{
                 params.ExpressionAttributeValues = {':s': email,}
+            }
             var result = await dynamo.query(params).promise();
             var data = result.Items;
             return {
@@ -67,7 +71,7 @@ module.exports = class Session {
             var Item = JSON.parse(body);
             Item.photographer = photographer
             var params = {
-                TableName: "photoEvent-Dynamo-session",
+                TableName: this.DYNAMODBTABLE,
                 Item: Item
             }
             console.log("param: ", params)
