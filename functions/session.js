@@ -14,7 +14,7 @@ module.exports = class Session {
     async getSessionsPhotos(key) {
         try {
             var params = {
-                Bucket: "photoevent",
+                Bucket: this.bucketName,
                 Prefix: key,
                 MaxKeys: 5
             };
@@ -75,6 +75,7 @@ module.exports = class Session {
             Item.photographer = photographer
             Item.mainkey=Item.event;
             Item.mainsort='SESSION#'+uuid;
+            Item.entity='SESSION'
             var params = {
                 TableName: this.DYNAMODBTABLE,
                 Item: Item
