@@ -5,65 +5,79 @@
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
-                "s3:PutObject"
+                "apigateway:DELETE",
+                "cloudformation:ListStacks",
+                "apigateway:PUT",
+                "cognito-identity:CreateIdentityPool",
+                "cognito-idp:CreateUserPool",
+                "s3:PutBucketPolicy",
+                "s3:CreateBucket",
+                "s3:ListBucket",
+                "apigateway:POST",
+                "apigateway:GET",
+                "cloudformation:ValidateTemplate",
+                "cloudfront:CreateDistribution",
+                "cloudfront:CreateCloudFrontOriginAccessIdentity"
             ],
-            "Resource": [
-                "arn:aws:s3:::photoevent/*"
-            ]
+            "Resource": "*"
         },
         {
             "Sid": "VisualEditor1",
             "Effect": "Allow",
-            "Action":[
-                "lambda:GetFunction",
-                "lambda:CreateFunction",
-                "lambda:UpdateFunctionCode",
-                "lambda:DeleteFunction",
-                "lambda:AddPermission"
+            "Action": [
+                "cloudfront:TagResource"
             ],
-            "Resource":[
-                "arn:aws:lambda:*:547749462802:function:*"
+            "Resource": [
+                "arn:aws:cloudfront::547749462802:distribution/*",
+                "arn:aws:cloudfront::547749462802:origin-access-identity/*"
             ]
         },
         {
             "Sid": "VisualEditor2",
             "Effect": "Allow",
             "Action": [
-                "apigateway:POST",
-                "apigateway:DELETE",
-                "apigateway:GET",
-                "apigateway:PUT",
-                "s3:ListBucket"
+                "cloudformation:CreateStack",
+                "cloudformation:DeleteStack",
+                "cloudformation:UpdateStack",
+                "cloudformation:CreateChangeSet",
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:ExecuteChangeSet",
+                "cloudformation:DescribeStacks"
             ],
-            "Resource": "*"
+            "Resource": [
+                "arn:aws:cloudformation:*:547749462802:stack/*/*"
+            ]
         },
         {
             "Sid": "VisualEditor3",
             "Effect": "Allow",
             "Action": [
+                "lambda:CreateFunction",
                 "iam:GetRole",
+                "lambda:GetFunction",
+                "cognito-idp:CreateGroup",
+                "lambda:UpdateFunctionConfiguration",
                 "iam:CreateRole",
                 "iam:DeleteRole",
                 "iam:PutRolePolicy",
-                "iam:PassRole",
-                "iam:DeleteRolePolicy",
-
-                "cloudfront:CreateInvalidation",
-
                 "dynamodb:DeleteTable",
+                "cloudfront:CreateInvalidation",
                 "dynamodb:CreateTable",
+                "lambda:UpdateFunctionCode",
+                "s3:PutObject",
+                "iam:PassRole",
+                "lambda:AddPermission",
                 "dynamodb:DescribeTable",
-
-                "cloudformation:CreateStack",
-                "cloudformation:DeleteStack",
-                "cloudformation:UpdateStack"
-
+                "iam:DeleteRolePolicy",
+                "lambda:DeleteFunction"
             ],
             "Resource": [
-                "arn:aws:cloudfront::547749462802:distribution/*",
-                "arn:aws:iam::547749462802:role/*",
                 "arn:aws:dynamodb:*:547749462802:table/*",
-                "arn:aws:cloudformation:*:547749462802:stack/*/*"
+                "arn:aws:lambda:*:547749462802:function:*",
+                "arn:aws:iam::547749462802:role/*",
+                "arn:aws:cognito-idp:*:547749462802:userpool/*",
+                "arn:aws:s3:::*/*",
+                "arn:aws:cloudfront::547749462802:distribution/*"
             ]
         }
     ]

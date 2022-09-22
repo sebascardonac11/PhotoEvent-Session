@@ -1,0 +1,81 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:ListStacks",
+                "cloudformation:ValidateTemplate",
+                "apigateway:DELETE",
+                "apigateway:PUT",
+                "s3:CreateBucket",
+                "s3:ListBucket",
+                "s3:DeleteBucketPolicy",
+                "s3:PutBucketPolicy",
+                "s3:PutObject",
+                "apigateway:POST",
+                "apigateway:GET",
+                "cognito-identity:CreateIdentityPool",
+                "cognito-idp:CreateUserPool",
+                "cloudfront:CreateDistribution"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": [
+                "iam:DeleteRolePolicy",
+                "iam:GetRole",
+                "iam:CreateRole",
+                "iam:DeleteRole",
+                "iam:PutRolePolicy",
+                "iam:PassRole",
+
+                "cognito-idp:CreateGroup",
+                "dynamodb:DescribeTable",
+                "dynamodb:DeleteTable",
+
+                "cloudfront:CreateInvalidation",
+                "dynamodb:CreateTable",
+
+                "lambda:AddPermission",
+                "lambda:UpdateFunctionCode",
+                "lambda:UpdateFunctionConfiguration",
+                "lambda:GetFunction",
+                "lambda:CreateFunction",
+                "lambda:DeleteFunction"
+            ],
+            "Resource": [
+                "arn:aws:lambda:*:547749462802:function:*",
+                "arn:aws:cloudfront::547749462802:distribution/*",
+                "arn:aws:iam::547749462802:role/*",
+                "arn:aws:dynamodb:*:547749462802:table/*",
+                "arn:aws:cognito-idp:*:547749462802:userpool/*"
+            ]
+        },
+        {
+            "Sid": "VisualEditor2",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:CreateStack",
+                "cloudformation:DeleteStack",
+                "cloudformation:UpdateStack",
+                "cloudformation:CreateChangeSet",
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:ExecuteChangeSet",
+                "cloudformation:DescribeStacks",
+                "cloudfront:CreateCloudFrontOriginAccessIdentity",
+                "cloudfront:DeleteCloudFrontOriginAccessIdentity",
+                "cloudfront:TagResource",
+                "cloudfront:UntagResource"
+            ],
+            "Resource": [
+                "arn:aws:cloudfront::547749462802:distribution/*",
+                "arn:aws:cloudfront::547749462802:origin-access-identity/*",
+                "arn:aws:cloudformation:*:547749462802:stack/*/*"
+            ]
+        }
+    ]
+}
