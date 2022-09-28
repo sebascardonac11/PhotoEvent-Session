@@ -7,7 +7,6 @@ env:
   enviromentName: pro
 jobs:
   Deployment:
-    needs: Infra
     runs-on: ubuntu-latest
     environment:
       name: pro
