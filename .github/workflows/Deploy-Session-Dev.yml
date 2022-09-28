@@ -2,12 +2,11 @@ name: Deploy Session Development
 on:
   push:
     branches:
-    - feature/putPhotos
+    - feature/updateDB
 env:
   enviromentName: dev
 jobs:
   Deployment:
-    #needs: Infra
     runs-on: ubuntu-latest
     environment:
       name: dev

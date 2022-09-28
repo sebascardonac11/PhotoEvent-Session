@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
-// AWS.config.update({ region: 'us-east-2' });
+//AWS.config.update({ region: 'us-east-2' });
 const s3Client = new AWS.S3();
+const Str = require('@supercharge/strings')
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 module.exports = class Session {
@@ -13,7 +14,7 @@ module.exports = class Session {
     async getSessionsPhotos(key) {
         try {
             var params = {
-                Bucket: "photoevent",
+                Bucket: this.bucketName,
                 Prefix: key,
                 MaxKeys: 5
             };
@@ -42,7 +43,7 @@ module.exports = class Session {
         try {
             var params = {
                 TableName: this.DYNAMODBTABLE,
-                KeyConditionExpression: 'Key =:e',
+                KeyConditionExpression: 'mainkey =:e',
             };
             if (event != 'null'){
                 params.FilterExpression= 'photographer  = :s';
@@ -51,8 +52,9 @@ module.exports = class Session {
                     ':e': event
                 }
             }else{
-                params.ExpressionAttributeValues = {':s': email,}
+              //  params.ExpressionAttributeValues = {':s': email,}
             }
+            //console.log(params)
             var result = await dynamo.query(params).promise();
             var data = result.Items;
             return {
@@ -68,8 +70,12 @@ module.exports = class Session {
     }
     async setSession(body, photographer) {
         try {
+            const uuid = Str.uuid() ;
             var Item = JSON.parse(body);
             Item.photographer = photographer
+            Item.mainkey=Item.event;
+            Item.mainsort='SESSION-'+uuid;
+            Item.entity='SESSION'
             var params = {
                 TableName: this.DYNAMODBTABLE,
                 Item: Item
