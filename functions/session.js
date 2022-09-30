@@ -46,10 +46,11 @@ module.exports = class Session {
                 KeyConditionExpression: 'mainkey =:e',
             };
             if (event != 'null'){
-                params.FilterExpression= 'photographer  = :s';
+                params.FilterExpression= 'photographer  = :s and entity=:entity';
                 params.ExpressionAttributeValues = {
                     ':s': email,
-                    ':e': event
+                    ':e': event,
+                    ':entity': 'SESSION'
                 }
             }else{
               //  params.ExpressionAttributeValues = {':s': email,}
