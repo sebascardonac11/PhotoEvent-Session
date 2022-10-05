@@ -4,21 +4,21 @@ const parser = require('lambda-multipart-parser');
 
 exports.handler = async function (event, context, callback) {
   try {
-    console.log("Event: ", event);
+    //console.log("Event: ", event);
     var session = new Session(process.env.BUCKET, process.env.DYNAMODB);
     //var session = new Session('photoeventdev', 'photoEvent');
     var authorizationDecoded = jwt_decode(event.headers.Authorization);
     switch (event.httpMethod) {
       case 'GET':
         if (event.resource == '/photoEvent-sessions/person') {
-          this.response = await session.getPersons(event.queryStringParameters.event)
+          this.response = await session.getPersons(event.queryStringParameters.session)
         }
         if (event.resource == '/photoEvent-sessions') {
-          this.response = await session.getSessions(authorizationDecoded.email, event.queryStringParameters.session);
+          this.response = await session.getSessions(authorizationDecoded.email, event.queryStringParameters.event);
         }
         break;
       case 'PUT':
-        console.log("### PUT ####");
+        //console.log("### PUT ####");
         const form = await parser.parse(event);
           var key = form.event + '/' + form.session + '/' + form.files[0].filename;
           var contenType = form.files[0].contentType;
@@ -26,7 +26,7 @@ exports.handler = async function (event, context, callback) {
           this.response = await session.putPhoto(key, contenType, body, authorizationDecoded.email);
         break;
       case 'POST':
-        console.log("### POST ####")
+        //console.log("### POST ####")
         this.response = await session.setSession(event.body, authorizationDecoded.email);
         break;
       default:
