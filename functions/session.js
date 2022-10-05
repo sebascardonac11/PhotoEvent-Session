@@ -55,7 +55,7 @@ module.exports = class Session {
             var personDB= await dynamo.query(params).promise();
             return {
                 statusCode: 200,
-                data: personDB.Item
+                data: personDB.Items
             }
         } catch (error) {
             console.log("Someting Wrong in Session.getPersons ", error)
