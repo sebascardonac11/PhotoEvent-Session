@@ -52,9 +52,7 @@ module.exports = class Session {
                 KeyConditionExpression: 'mainkey =:hashKey',
                 FilterExpression: 'entity=:entity'
             }
-            console.log("Param: ", params);
             var personDB= await dynamo.query(params).promise();
-            console.log("personDB: ", personDB);
             return {
                 statusCode: 200,
                 data: personDB.Items
