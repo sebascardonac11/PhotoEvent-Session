@@ -15,9 +15,6 @@ exports.handler = async function (event, context, callback) {
         }
         if (event.resource == '/photoEvent-sessions') {
           this.response = await session.getSessions(authorizationDecoded.email, event.queryStringParameters.event);
-        } else {
-          var key = "photoClient/"+event.queryStringParameters.event+'/'+event.queryStringParameters.session;
-          this.response = await session.getSessionsPhotos(key);
         }
         break;
       case 'PUT':

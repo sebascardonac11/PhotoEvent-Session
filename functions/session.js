@@ -11,34 +11,6 @@ module.exports = class Session {
         this.bucketName = bucket;
         this.DYNAMODBTABLE = table
     }
-    async getSessionsPhotos(key) {
-        try {
-            var params = {
-                Bucket: this.bucketName,
-                Prefix: key,
-                MaxKeys: 5
-            };
-            const objects = await s3Client.listObjectsV2(params).promise();
-            for (const i in objects.Contents) {
-                const presignedURL = s3Client.getSignedUrl('getObject', {
-                    Bucket: this.bucketName,
-                    Key: objects.Contents[i].Key,
-                    Expires: 10
-                });
-                objects.Contents[i].url = presignedURL;
-            }
-            console.log('objects ', objects)
-            return {
-                statusCode: 200,
-                data: objects.Contents
-            }
-        } catch (error) {
-            return {
-                statusCode: 404,
-                data: error
-            }
-        }
-    }
     async getSessions(email, event) {
         try {
             var params = {
@@ -71,6 +43,16 @@ module.exports = class Session {
     }
     async getPersons(event) {
         try {
+            var params = {
+                TableName: this.DYNAMODBTABLE,
+                ExpressionAttributeValues: {
+                    ':hashKey': event,
+                    ':entity': 'PERSON'
+                },
+                KeyConditionExpression: 'mainkey =:hashKey',
+                FilterExpression: 'entity=:entity'
+            }
+            var personDB= await dynamo.query(params).promise();
             return {
                 statusCode: 200,
                 data: "Aqui van las personas"
