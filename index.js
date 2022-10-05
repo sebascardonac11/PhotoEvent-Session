@@ -10,6 +10,9 @@ exports.handler = async function (event, context, callback) {
     var authorizationDecoded = jwt_decode(event.headers.Authorization);
     switch (event.httpMethod) {
       case 'GET':
+        if (event.resource == '/photoEvent-sessions/persons') {
+          this.response = await session.getPersons(event.queryStringParameters.event)
+        }
         if (event.resource == '/photoEvent-sessions') {
           this.response = await session.getSessions(authorizationDecoded.email, event.queryStringParameters.event);
         } else {
