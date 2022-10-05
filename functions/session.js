@@ -45,15 +45,15 @@ module.exports = class Session {
                 TableName: this.DYNAMODBTABLE,
                 KeyConditionExpression: 'mainkey =:e',
             };
-            if (event != 'null'){
-                params.FilterExpression= 'photographer  = :s and entity=:entity';
+            if (event != 'null') {
+                params.FilterExpression = 'photographer  = :s and entity=:entity';
                 params.ExpressionAttributeValues = {
                     ':s': email,
                     ':e': event,
                     ':entity': 'SESSION'
                 }
-            }else{
-              //  params.ExpressionAttributeValues = {':s': email,}
+            } else {
+                //  params.ExpressionAttributeValues = {':s': email,}
             }
             //console.log(params)
             var result = await dynamo.query(params).promise();
@@ -69,14 +69,28 @@ module.exports = class Session {
             }
         }
     }
+    async getPersons(event) {
+        try {
+            return {
+                statusCode: 200,
+                data: "Aqui van las personas"
+            }
+        } catch (error) {
+            console.log("Someting Wrong in Session.getPersons ", error)
+            return {
+                statusCode: 400,
+                data: "Someting Wrong in Session.getPersons "
+            };
+        }
+    }
     async setSession(body, photographer) {
         try {
-            const uuid = Str.uuid() ;
+            const uuid = Str.uuid();
             var Item = JSON.parse(body);
             Item.photographer = photographer
-            Item.mainkey=Item.event;
-            Item.mainsort='SESSION-'+uuid;
-            Item.entity='SESSION'
+            Item.mainkey = Item.event;
+            Item.mainsort = 'SESSION-' + uuid;
+            Item.entity = 'SESSION'
             var params = {
                 TableName: this.DYNAMODBTABLE,
                 Item: Item
