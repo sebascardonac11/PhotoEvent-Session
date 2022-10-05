@@ -14,7 +14,7 @@ exports.handler = async function (event, context, callback) {
           this.response = await session.getPersons(event.queryStringParameters.event)
         }
         if (event.resource == '/photoEvent-sessions') {
-          this.response = await session.getSessions(authorizationDecoded.email, event.queryStringParameters.event);
+          this.response = await session.getSessions(authorizationDecoded.email, event.queryStringParameters.session);
         }
         break;
       case 'PUT':

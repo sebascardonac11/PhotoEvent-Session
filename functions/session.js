@@ -41,12 +41,12 @@ module.exports = class Session {
             }
         }
     }
-    async getPersons(event) {
+    async getPersons(session) {
         try {
             var params = {
                 TableName: this.DYNAMODBTABLE,
                 ExpressionAttributeValues: {
-                    ':hashKey': event,
+                    ':hashKey': session,
                     ':entity': 'PERSON'
                 },
                 KeyConditionExpression: 'mainkey =:hashKey',
@@ -55,7 +55,7 @@ module.exports = class Session {
             var personDB= await dynamo.query(params).promise();
             return {
                 statusCode: 200,
-                data: "Aqui van las personas"
+                data: personDB.Item
             }
         } catch (error) {
             console.log("Someting Wrong in Session.getPersons ", error)
