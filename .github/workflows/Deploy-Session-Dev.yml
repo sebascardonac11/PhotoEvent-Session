@@ -3,6 +3,7 @@ on:
   push:
     branches:
     - feature/updateDB
+    - feature/getPerson
 env:
   enviromentName: dev
 jobs:
