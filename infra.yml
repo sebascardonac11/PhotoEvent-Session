@@ -1,0 +1,348 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ## SESSION ##
+  LambdaFuncName:
+    Type: String
+    Default: photoEvent-lambda-session
+  ApiPathNameSession:
+    Type: String
+    Default: photoEvent-sessions
+Resources:
+################## SESSION ################
+  LambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Timeout: 10
+      Code:
+        ZipFile: |
+          console.log('Loading Lambda function');
+      FunctionName:
+        Ref: LambdaFuncName
+      Handler: index.handler
+      Runtime: nodejs16.x
+      Role:
+        Fn::ImportValue: PhotoEvent-IAMRoleName
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 9dec56b7-939f-4bc7-9200-47da6127bfe1
+  APIGatewayResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiID
+      ParentId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiResource
+      PathPart:
+        Ref: ApiPathNameSession
+  APIGatewayMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      RestApiId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiID
+      ResourceId: !Ref APIGatewayResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: 
+        Fn::ImportValue: PhotoEvent-APIGwAuthorizer
+      MethodResponses:
+        - StatusCode: 200
+      Integration:
+        Type: AWS_PROXY
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+        IntegrationHttpMethod: POST
+        Uri: !Sub 
+          - >-
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFuncNameArn}/invocations
+          - LambdaFuncNameArn: !GetAtt LambdaFunction.Arn
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true    
+    DependsOn:
+      - APIGatewayResource
+  ApiGwGet:
+    Type: 'AWS::ApiGateway::Method'
+    DependsOn:
+      - APIGatewayResource
+      - LambdaFunction
+    Properties:
+      ResourceId: !Ref APIGatewayResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: 
+        Fn::ImportValue: PhotoEvent-APIGwAuthorizer
+      RestApiId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiID
+      Integration:
+        Type: AWS_PROXY
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: $input.json('$')          
+            ResponseParameters:
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+        IntegrationHttpMethod: POST
+        Uri: !Sub 
+          - >-
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFuncNameArn}/invocations
+          - LambdaFuncNameArn: !GetAtt LambdaFunction.Arn
+        RequestTemplates:
+          application/json: $input.json('$')
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+  OptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref APIGatewayResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE      
+      RestApiId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiID
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+    DependsOn:
+        - APIGatewayResource 
+  APIGwResorceSession:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiID
+      ParentId: !Ref APIGatewayResource
+      PathPart: 'session'
+    DependsOn:
+      - APIGatewayResource  
+  APIGwResorceSessionId:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiID
+      ParentId:  !Ref APIGwResorceSession
+      PathPart: '{id+}'
+    DependsOn:
+      - APIGwResorceSession  
+  ApiGwSesssionIdOpt:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref APIGwResorceSessionId
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE      
+      RestApiId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiID
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+              multipart/form-data: 'Empty'
+              image/jpeg: 'Empty'
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+    DependsOn:
+        - APIGwResorceSessionId 
+  ApiGwAny:
+    Type: 'AWS::ApiGateway::Method'
+    DependsOn:
+      - APIGwResorceSessionId
+      - LambdaFunction
+    Properties:
+      ResourceId: !Ref APIGwResorceSessionId
+      HttpMethod: ANY
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: 
+        Fn::ImportValue: PhotoEvent-APIGwAuthorizer
+      RestApiId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiID
+      RequestParameters:
+        method.request.path.proxy: true
+      RequestModels :
+        application/json:     'Empty'
+        multipart/form-data:  'Empty'
+        image/jpeg:           'Empty'
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 
+          - >-
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFuncNameArn}/invocations
+          - LambdaFuncNameArn: !GetAtt LambdaFunction.Arn  
+        RequestTemplates:
+          application/json: $input.json('$')
+          multipart/form-data: $input.json('$')
+          image/jpeg: $input.json('$')
+        IntegrationResponses:
+          - StatusCode: 200
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: $input.json('$')          
+            ResponseParameters:
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+  APIGwResorceSessionPerson:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiID
+      ParentId: !Ref APIGwResorceSession
+      PathPart: 'person'
+    DependsOn:
+      - APIGatewayResource 
+  ApiGwAnySessionPerson:
+    Type: 'AWS::ApiGateway::Method'
+    DependsOn:
+      - APIGwResorceSessionPerson
+      - LambdaFunction
+    Properties:
+      ResourceId: !Ref APIGwResorceSessionPerson
+      HttpMethod: ANY
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: 
+        Fn::ImportValue: PhotoEvent-APIGwAuthorizer
+      RestApiId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiID
+      RequestParameters:
+        method.request.path.proxy: true
+      RequestModels :
+        application/json:     'Empty'
+        multipart/form-data:  'Empty'
+        image/jpeg:           'Empty'
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 
+          - >-
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFuncNameArn}/invocations
+          - LambdaFuncNameArn: !GetAtt LambdaFunction.Arn  
+        RequestTemplates:
+          application/json: $input.json('$')
+          multipart/form-data: $input.json('$')
+          image/jpeg: $input.json('$')
+        IntegrationResponses:
+          - StatusCode: 200
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: $input.json('$')          
+            ResponseParameters:
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true 
+  ApiGwOptSessionPerson:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref APIGwResorceSessionPerson
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE      
+      RestApiId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiID
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+    DependsOn:
+        - APIGwResorceSessionPerson 
+  APIGatewayDeployment:
+    Type: 'AWS::ApiGateway::Deployment'
+    Properties:
+      Description : 'Deploy Sessions'
+      RestApiId: 
+        Fn::ImportValue: PhotoEvent-ApiGwRestApiID
+      StageName:
+        Fn::ImportValue: PhotoEvent-Enviroment
+    DependsOn:
+      - APIGatewayMethod
+      - ApiGwGet
+      - ApiGwAny
+      - ApiGwAnySessionPerson
+  APIGatewayPermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt LambdaFunction.Arn
+      Principal: apigateway.amazonaws.com
+    DependsOn:
+      - APIGatewayDeployment
