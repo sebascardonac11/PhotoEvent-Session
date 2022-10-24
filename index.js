@@ -4,7 +4,7 @@ const parser = require('lambda-multipart-parser');
 
 exports.handler = async function (event, context, callback) {
   try {
-    //console.log("Event: ", event);
+    console.log("Event: ", event);
     var session = new Session(process.env.BUCKET, process.env.DYNAMODB);
     //var session = new Session('photoeventdev', 'photoEvent');
     var response = { statusCode: 401, data: "Whitout Information" };
