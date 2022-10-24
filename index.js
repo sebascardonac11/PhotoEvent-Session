@@ -11,7 +11,7 @@ exports.handler = async function (event, context, callback) {
     var authorizationDecoded = jwt_decode(event.headers.Authorization);
     switch (event.httpMethod) {
       case 'GET':
-        if (event.resource == '/photoEvent-sessions/person') {
+        if (event.resource == '/photoEvent-sessions/session/person') {
           response = await session.getPersons(event.queryStringParameters.session)
         }
         if (event.resource == '/photoEvent-sessions') {
