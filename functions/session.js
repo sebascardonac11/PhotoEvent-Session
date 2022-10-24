@@ -53,7 +53,6 @@ module.exports = class Session {
                 FilterExpression: 'entity=:entity'
             }
             var personDB= await dynamo.query(params).promise();
-            console.log(personDB);
             return {
                 statusCode: 200,
                 data: personDB.Items
